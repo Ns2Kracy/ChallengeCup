@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"ChallengeCup/common"
 	"ChallengeCup/model"
 
 	"github.com/kataras/iris/v12"
@@ -18,9 +19,8 @@ func Cors() iris.Handler {
 		ctx.Header("Content-Type", "application/json;charset=UTF-8")
 		if ctx.Method() == "OPTIONS" {
 			ctx.JSON(model.Result{
-				Code:    200,
-				Message: "OK",
-				Data:    nil,
+				Code:    common.SUCCESS,
+				Message: common.Message(common.SUCCESS),
 			})
 		}
 		ctx.Next()

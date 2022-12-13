@@ -1,10 +1,12 @@
 package main
 
 import (
+	"ChallengeCup/dao"
+	"ChallengeCup/service"
 	"net"
 
 	"ChallengeCup/config"
-	router "ChallengeCup/router"
+	"ChallengeCup/router"
 
 	"github.com/kataras/iris/v12"
 )
@@ -12,10 +14,13 @@ import (
 func main() {
 	app := iris.New()
 	router.InitRoute(app)
+	_ = service.NewService(dao.InitMysql())
+	conf, err := config.NewConfig("config.yaml")
+	if err != nil {
+		return
+	}
 
-	config := config.InitConfig()
-
-	listener, err := net.Listen("tcp", config.System.Host+":"+config.System.Port)
+	listener, err := net.Listen("tcp", conf.System.Host+":"+conf.System.Port)
 	if err != nil {
 		return
 	}
@@ -27,7 +32,6 @@ func main() {
 		iris.WithLogLevel("DEBUG"),
 		iris.WithOptimizations,
 		iris.WithConfiguration(iris.Configuration{
-			// DisableStartupLog: true,
 			Charset: "UTF-8",
 		}),
 		iris.WithTimeFormat("2006-01-02 15:04:05"),

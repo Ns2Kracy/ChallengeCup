@@ -5,8 +5,17 @@ go 1.19
 require github.com/kataras/iris/v12 v12.2.0-beta6.0.20221209154258-d00eac0e25f9 // direct
 
 require (
+	github.com/go-sql-driver/mysql v1.7.0
 	github.com/sirupsen/logrus v1.9.0
 	gopkg.in/yaml.v3 v3.0.1
+	gorm.io/driver/mysql v1.4.4
+	gorm.io/gorm v1.24.2
+)
+
+require (
+	github.com/iris-contrib/middleware v12.1.2+incompatible // indirect
+	github.com/jinzhu/inflection v1.0.0 // indirect
+	github.com/jinzhu/now v1.1.5 // indirect
 )
 
 require (
@@ -24,6 +33,7 @@ require (
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
+	github.com/iris-contrib/middleware/jwt v0.0.0-20221109225525-f806663b83a0
 	github.com/iris-contrib/schema v0.0.6 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect

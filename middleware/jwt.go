@@ -1,15 +1,18 @@
 package middleware
 
 import (
+	"strconv"
 	"time"
 
+	"ChallengeCup/common"
 	"ChallengeCup/model"
 
-	jwt "github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/kataras/iris/v12"
 )
 
 var secret = make([]byte, 32)
+
 
 type Claims struct {
 	Username string `json:"username"`
@@ -18,36 +21,8 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-func GenerateToken(username string, password string, id int, t time.Duration) (string, error) {
-	claims := Claims{
-		username,
-		password,
-		id,
-		jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(t)),
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			NotBefore: jwt.NewNumericDate(time.Now()),
-		},
-	}
-	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	token, err := tokenClaims.SignedString(secret)
-	return token, err
-}
-
-func ParseToken(token string, valid bool) (*Claims, error) {
-	tokenClaims, err := jwt.ParseWithClaims(token, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		return secret, nil
-	})
-	if tokenClaims != nil {
-		if claims, ok := tokenClaims.Claims.(*Claims); ok {
-			if valid && tokenClaims.Valid {
-				return claims, nil
-			} else if !valid {
-				return claims, nil
-			}
-		}
-	}
-	return nil, err
+func ParseToken(tokenString string, isVerify bool) (*Claims, error) {
+	return nil, nil
 }
 
 func ValidateToken(token string) (*Claims, error) {
@@ -70,9 +45,8 @@ func JWT() iris.Handler {
 		token := ctx.GetHeader("Authorization")
 		if len(token) == 0 {
 			ctx.JSON(model.Result{
-				Code:    401,
-				Message: "权限不足",
-				Data:    nil,
+				Code:    common.AUTH_ERROR,
+				Message: common.Message(common.AUTH_ERROR),
 			})
 			ctx.StopExecution()
 			return
@@ -80,14 +54,13 @@ func JWT() iris.Handler {
 		claims, err := ValidateToken(token)
 		if err != nil {
 			ctx.JSON(model.Result{
-				Code:    401,
-				Message: "权限不足",
-				Data:    nil,
+				Code:    common.AUTH_ERROR,
+				Message: common.Message(common.AUTH_ERROR),
 			})
 			ctx.StopExecution()
 			return
 		}
-		ctx.Values().Set("claims", claims)
+		ctx.Request().Header.Add("id", strconv.Itoa(claims.ID))
 		ctx.Next()
 	}
 }
