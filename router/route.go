@@ -11,15 +11,15 @@ import (
 
 func InitRoute(r *iris.Application) {
 	r.UseGlobal(middleware.Cors())
-	r.Get("/", func(ctx iris.Context) {
-		ctx.HTML("<h1>Welcome to Challenge Cup</h1>")
-	})
-	r.Post("/api/user/login", controller.PostUserLogin)
-	r.Post("/api/user/register", controller.PostUserRegisterByUserNameAndPassword)
-	group := r.Party("/api")
-	group.Use(middleware.JWT())
+	v1 := r.Party("/api/v1")
+	v1.Post("/user/login", controller.PostUserLogin)
+	v1.Post("/user/register-by-name", controller.PostUserRegisterByUserNameAndPassword)
+	v1.Post("/user/register-by-phone", controller.PostUserRegisterByPhone)
+	v1.Post("/user/register-by-email", controller.PostUserRegisterByEmail)
+	group := r.Party(v1.GetRelPath())
+	group.Use(middleware.JwtAuthMiddleware)
 	{
-		group.Get("/user", func(ctx iris.Context) {
+		group.Get("/user/test", func(ctx iris.Context) {
 			ctx.JSON(model.Result{
 				Code:    common.SUCCESS,
 				Message: common.Message(common.SUCCESS),

@@ -1,7 +1,10 @@
 package controller
 
 import (
+	"time"
+
 	"ChallengeCup/common"
+	"ChallengeCup/middleware"
 	"ChallengeCup/model"
 	"ChallengeCup/service"
 	"ChallengeCup/service/dbmodel"
@@ -54,7 +57,14 @@ func PostUserRegisterByUserNameAndPassword(ctx iris.Context) {
 	})
 }
 
-func PostUserRegisterByPhone(ctx iris.Context) {}
+func PostUserRegisterByPhone(ctx iris.Context) {
+	// TODO: phone register
+}
+
+func PostUserRegisterByEmail(ctx iris.Context) {
+	// TODO: email register
+}
+
 
 func PostUserLogin(ctx iris.Context) {
 	userRequest := model.User{}
@@ -92,8 +102,14 @@ func PostUserLogin(ctx iris.Context) {
 		return
 	}
 
+	token := model.VaildateToken{}
+	token.AccessToken = middleware.GetAccessToken(user.UserName, user.Password, user.ID)
+	token.RefreshToken = middleware.GetRefreshToken(user.UserName, user.Password, user.ID)
+	token.ExpiresIn = time.Now().Add(3 * time.Hour * time.Duration(1)).Unix()
+
 	ctx.JSON(model.Result{
 		Code:    common.SUCCESS,
 		Message: common.Message(common.SUCCESS),
+		Data:    token,
 	})
 }

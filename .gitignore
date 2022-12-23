@@ -15,3 +15,6 @@ tmp
 
 .vscode
 .idea
+
+# jwt secret
+common/jwt_secret.go
