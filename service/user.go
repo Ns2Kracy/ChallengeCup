@@ -21,6 +21,12 @@ type userService struct {
 	db *gorm.DB
 }
 
+func NewUserService(db *gorm.DB) UserService {
+	return &userService{
+		db: db,
+	}
+}
+
 func (u *userService) DeleteAll() {
 	u.db.Delete(&dbmodel.UserDBModel{})
 }
@@ -58,8 +64,4 @@ func (u *userService) GetUserById(id string) dbmodel.UserDBModel {
 	user := dbmodel.UserDBModel{}
 	u.db.Where("id = ?", id).First(&user)
 	return user
-}
-
-func NewUserService(db *gorm.DB) UserService {
-	return &userService{db: db}
 }

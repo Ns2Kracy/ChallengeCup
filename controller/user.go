@@ -13,16 +13,9 @@ import (
 	"github.com/kataras/iris/v12"
 )
 
-// Description: register by username
-// Author: Ns2Kracy
-// Updated: 12 13th, 2022 23:05
-// Accept: application/json
-// Produce: application/json
-// Params: username, password (string)
-// Router: /user/register-by-name [POST]
 func PostUserRegisterByUserNameAndPassword(ctx iris.Context) {
-	userRequest := model.User{}
-	if err := ctx.ReadJSON(&userRequest); err != nil {
+	userRequest := &model.User{}
+	if err := ctx.ReadJSON(userRequest); err != nil {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.INVALID_PARAMS),
@@ -44,9 +37,9 @@ func PostUserRegisterByUserNameAndPassword(ctx iris.Context) {
 		return
 	}
 
-	checkUserExist := service.AppService.UserService.GetUserByName(userRequest.UserName)
+	checkUserExist := service.Service.UserService.IsExistByName(userRequest.UserName)
 
-	if checkUserExist.ID != 0 {
+	if checkUserExist {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.USER_EXIST),
@@ -58,8 +51,7 @@ func PostUserRegisterByUserNameAndPassword(ctx iris.Context) {
 	newUser.UserName = userRequest.UserName
 	newUser.Password = encrypt.EncryptPassword(userRequest.Password)
 
-	// 将用户信息存入数据库
-	newUser = service.AppService.UserService.NewUser(newUser)
+	newUser = service.Service.UserService.NewUser(newUser)
 
 	ctx.JSON(model.Result{
 		Code:    common.SUCCESS,
@@ -67,35 +59,14 @@ func PostUserRegisterByUserNameAndPassword(ctx iris.Context) {
 	})
 }
 
-// Description: register by phone
-// Author: Ns2Kracy
-// Updated: 12 23rd, 2022 23:56
-// Accept: application/json
-// Produce: application/json
-// Params: username, password (string)
-// Router: /user/register-by-phone [POST]
 func PostUserRegisterByPhone(ctx iris.Context) {
 	// TODO: phone register
 }
 
-// Description: register by email
-// Author: Ns2Kracy
-// Updated: 12 23rd, 2022 23:56
-// Accept: application/json
-// Produce: application/json
-// Params: username, password (string)
-// Router: /user/register-by-email [POST]
 func PostUserRegisterByEmail(ctx iris.Context) {
 	// TODO: email register
 }
 
-// Description: login
-// Author: Ns2Kracy
-// Updated: 12 13th, 2022 23:05
-// Accept: application/json
-// Produce: application/json
-// Params: username | phone | email, password (string)
-// Router: /user/login [POST]
 func PostUserLogin(ctx iris.Context) {
 	userRequest := model.User{}
 	if err := ctx.ReadJSON(&userRequest); err != nil {
@@ -114,12 +85,12 @@ func PostUserLogin(ctx iris.Context) {
 		return
 	}
 
-	user := service.AppService.UserService.GetUserByName(userRequest.UserName)
+	user := service.Service.UserService.GetUserByName(userRequest.UserName)
 
 	if user.ID == 0 {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
-			Message: common.Message(common.ERROR_PASSWORD),
+			Message: common.Message(common.USER_NOT_EXIST),
 		})
 		return
 	}
@@ -127,12 +98,12 @@ func PostUserLogin(ctx iris.Context) {
 	if !encrypt.ComparePassword(userRequest.Password, user.Password) {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
-			Message: common.Message(common.INVALID_PARAMS),
+			Message: common.Message(common.ERROR_PASSWORD),
 		})
 		return
 	}
 
-	token := model.VaildateToken{}
+	token := model.ValidateToken{}
 	token.AccessToken = middleware.GetAccessToken(user.UserName, user.Password, user.ID)
 	token.RefreshToken = middleware.GetRefreshToken(user.UserName, user.Password, user.ID)
 	token.ExpiresIn = time.Now().Add(3 * time.Hour * time.Duration(1)).Unix()
@@ -141,5 +112,40 @@ func PostUserLogin(ctx iris.Context) {
 		Code:    common.SUCCESS,
 		Message: common.Message(common.SUCCESS),
 		Data:    token,
+	})
+}
+
+func GetUserInfoById(ctx iris.Context) {
+	id := ctx.GetHeader("id")
+	user := service.Service.UserService.GetUserById(id)
+	ctx.JSON(model.Result{
+		Code:    common.SUCCESS,
+		Message: common.Message(common.SUCCESS),
+		Data:    user,
+	})
+}
+
+func GetUserInfoByName(ctx iris.Context) {
+	username := ctx.Params().Get("username")
+	if len(username) == 0 {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.INVALID_PARAMS),
+		})
+		return
+	}
+	user := service.Service.UserService.GetUserByName(username)
+	if user.ID == 0 {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.USER_NOT_EXIST),
+		})
+		return
+	}
+
+	ctx.JSON(model.Result{
+		Code:    common.SUCCESS,
+		Message: common.Message(common.SUCCESS),
+		Data:    user,
 	})
 }

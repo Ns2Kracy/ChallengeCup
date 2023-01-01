@@ -27,14 +27,7 @@ var (
 		ErrorHandler:        errorHandler,
 	}).Serve
 	validationKeyGetterFuc = func(token *jwt.Token) (interface{}, error) {
-		claims, err := ParseToken(token.Raw, false)
-
-		if err != nil {
-			return nil, err
-		} else if !claims.VerifyExpiresAt(time.Now(), true) {
-			return nil, nil
-		}
-		return claims, nil
+		return common.Secret, nil
 	}
 	extractor = func(ctx iris.Context) (string, error) {
 		auth := ctx.GetHeader("Authorization")
@@ -67,22 +60,6 @@ func GenerateToken(username string, password string, id int, issuer string, t ti
 		return "", err
 	}
 	return tokenString, nil
-}
-
-func ParseToken(tokenString string, isVerify bool) (*Claims, error) {
-	tokenClaims, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		return common.Secret, nil
-	})
-	if tokenClaims != nil {
-		if claims, ok := tokenClaims.Claims.(*Claims); ok {
-			if isVerify && tokenClaims.Valid {
-				return claims, nil
-			} else if !isVerify {
-				return claims, nil
-			}
-		}
-	}
-	return nil, err
 }
 
 func GetAccessToken(username, pwd string, id int) string {

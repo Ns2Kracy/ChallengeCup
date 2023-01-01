@@ -3,8 +3,6 @@ package main
 import (
 	"net"
 
-	"ChallengeCup/dao"
-	"ChallengeCup/service"
 	"ChallengeCup/config"
 	"ChallengeCup/router"
 
@@ -19,7 +17,6 @@ var Configuration = iris.Configuration{
 func main() {
 	app := iris.New()
 	router.InitRoute(app)
-	_ = service.NewService(dao.InitMysql())
 	conf, err := config.NewConfig("config.yaml")
 	if err != nil {
 		return

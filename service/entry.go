@@ -1,15 +1,19 @@
 package service
 
-import "gorm.io/gorm"
+import (
+	"ChallengeCup/dao"
 
-var AppService = new(ServiceEntry)
+	"gorm.io/gorm"
+)
 
 type ServiceEntry struct {
-	UserService
+	UserService UserService
 }
 
-func NewService(db *gorm.DB) ServiceEntry {
-	return ServiceEntry{
-		NewUserService(db),
+func NewServiceEntry(db *gorm.DB) *ServiceEntry {
+	return &ServiceEntry{
+		UserService: NewUserService(db),
 	}
 }
+
+var Service = NewServiceEntry(dao.InitMysql())

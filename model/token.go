@@ -1,7 +1,7 @@
 package model
 
-type VaildateToken struct {
-	AccessToken string
+type ValidateToken struct {
+	AccessToken  string
 	RefreshToken string
-	ExpiresIn int64
+	ExpiresIn    int64
 }

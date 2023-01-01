@@ -1,10 +1,8 @@
 package router
 
 import (
-	"ChallengeCup/common"
 	"ChallengeCup/controller"
 	"ChallengeCup/middleware"
-	"ChallengeCup/model"
 
 	"github.com/kataras/iris/v12"
 )
@@ -12,6 +10,10 @@ import (
 func InitRoute(r *iris.Application) {
 	r.UseGlobal(middleware.Cors())
 	v1 := r.Party("/api/v1")
+	iris.RegisterOnInterrupt(middleware.Monitor.Stop)
+	v1.Post("/monitor", middleware.Monitor.Stats)
+	v1.Get("/monitor", middleware.Monitor.View)
+	
 	v1.Post("/user/login", controller.PostUserLogin)
 	v1.Post("/user/register-by-name", controller.PostUserRegisterByUserNameAndPassword)
 	v1.Post("/user/register-by-phone", controller.PostUserRegisterByPhone)
@@ -19,11 +21,7 @@ func InitRoute(r *iris.Application) {
 	group := r.Party(v1.GetRelPath())
 	group.Use(middleware.JwtAuthMiddleware)
 	{
-		group.Get("/user/test", func(ctx iris.Context) {
-			ctx.JSON(model.Result{
-				Code:    common.SUCCESS,
-				Message: common.Message(common.SUCCESS),
-			})
-		})
+		group.Get("/user/info/{id:int}", controller.GetUserInfoById)
+		group.Get("/user/info/{username:string}", controller.GetUserInfoByName)
 	}
 }

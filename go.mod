@@ -12,9 +12,16 @@ require (
 )
 
 require (
+	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
+	github.com/lufia/plan9stats v0.0.0-20220913051719-115f729f3c8c // indirect
+	github.com/power-devops/perfstat v0.0.0-20221212215047-62379fc7944b // indirect
+	github.com/shirou/gopsutil/v3 v3.22.12 // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
+	github.com/tklauser/go-sysconf v0.3.11 // indirect
+	github.com/tklauser/numcpus v0.6.0 // indirect
+	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 )
 
 require (

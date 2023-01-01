@@ -10,6 +10,7 @@ const (
 	SIMPLE_PASSWORD = 10002
 	USER_EXIST      = 10003
 	ERROR_PASSWORD  = 10004
+	USER_NOT_EXIST  = 10005
 )
 
 var message = map[int]string{
@@ -22,6 +23,7 @@ var message = map[int]string{
 	SIMPLE_PASSWORD: "Password is too simple",
 	USER_EXIST:      "User already exist",
 	ERROR_PASSWORD:  "Password is wrong",
+	USER_NOT_EXIST:  "User not exist",
 }
 
 func Message(code int) string {
