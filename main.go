@@ -5,7 +5,6 @@ import (
 
 	"ChallengeCup/dao"
 	"ChallengeCup/service"
-
 	"ChallengeCup/config"
 	"ChallengeCup/router"
 
@@ -13,7 +12,8 @@ import (
 )
 
 var Configuration = iris.Configuration{
-	Charset: "UTF-8",
+	Charset:  "UTF-8",
+	LogLevel: "DEBUG",
 }
 
 func main() {
@@ -34,7 +34,6 @@ func main() {
 
 	if err := app.Run(
 		iris.Listener(listener),
-		iris.WithLogLevel("DEBUG"),
 		iris.WithOptimizations,
 		iris.WithConfiguration(Configuration),
 		iris.WithTimeFormat("2006-01-02 15:04:05"),

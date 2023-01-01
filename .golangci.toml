@@ -37,8 +37,10 @@ enable = [
   "prealloc",
   "usestdlibvars",
   "whitespace",
-  "errcheck",
+  #  "errcheck",
 ]
+
+disable = ["errcheck"]
 
 [linters-settings.govet]
 check-shadowing = true

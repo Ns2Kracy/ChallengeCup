@@ -13,6 +13,13 @@ import (
 	"github.com/kataras/iris/v12"
 )
 
+// Description: register by username
+// Author: Ns2Kracy
+// Updated: 12 13th, 2022 23:05
+// Accept: application/json
+// Produce: application/json
+// Params: username, password (string)
+// Router: /user/register-by-name [POST]
 func PostUserRegisterByUserNameAndPassword(ctx iris.Context) {
 	userRequest := model.User{}
 	if err := ctx.ReadJSON(&userRequest); err != nil {
@@ -51,21 +58,44 @@ func PostUserRegisterByUserNameAndPassword(ctx iris.Context) {
 	newUser.UserName = userRequest.UserName
 	newUser.Password = encrypt.EncryptPassword(userRequest.Password)
 
+	// 将用户信息存入数据库
+	newUser = service.AppService.UserService.NewUser(newUser)
+
 	ctx.JSON(model.Result{
 		Code:    common.SUCCESS,
 		Message: common.Message(common.SUCCESS),
 	})
 }
 
+// Description: register by phone
+// Author: Ns2Kracy
+// Updated: 12 23rd, 2022 23:56
+// Accept: application/json
+// Produce: application/json
+// Params: username, password (string)
+// Router: /user/register-by-phone [POST]
 func PostUserRegisterByPhone(ctx iris.Context) {
 	// TODO: phone register
 }
 
+// Description: register by email
+// Author: Ns2Kracy
+// Updated: 12 23rd, 2022 23:56
+// Accept: application/json
+// Produce: application/json
+// Params: username, password (string)
+// Router: /user/register-by-email [POST]
 func PostUserRegisterByEmail(ctx iris.Context) {
 	// TODO: email register
 }
 
-
+// Description: login
+// Author: Ns2Kracy
+// Updated: 12 13th, 2022 23:05
+// Accept: application/json
+// Produce: application/json
+// Params: username | phone | email, password (string)
+// Router: /user/login [POST]
 func PostUserLogin(ctx iris.Context) {
 	userRequest := model.User{}
 	if err := ctx.ReadJSON(&userRequest); err != nil {
