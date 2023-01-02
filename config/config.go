@@ -11,6 +11,7 @@ import (
 type Config struct {
 	System *System `yaml:"system"`
 	Mysql  *Mysql  `yaml:"mysql"`
+	Redis  *Redis  `yaml:"redis"`
 }
 
 func NewConfig(path string) (*Config, error) {
@@ -28,6 +29,12 @@ func NewConfig(path string) (*Config, error) {
 			User:     "username",
 			Pwd:      "password",
 			Driver:   "mysql",
+		},
+		Redis: &Redis{
+			Host:     "localhost",
+			Port:     "6379",
+			Password: "",
+			DB:       0,
 		},
 	}
 	if !file.IsExist(path) {
@@ -47,6 +54,7 @@ func NewConfig(path string) (*Config, error) {
 
 func LoadConfig() *Config {
 	f, _ := os.Open("config.yaml")
+	defer f.Close()
 	decoder := yaml.NewDecoder(f)
 	config := &Config{}
 	err := decoder.Decode(config)

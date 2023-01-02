@@ -59,6 +59,10 @@ func PostUserRegisterByUserNameAndPassword(ctx iris.Context) {
 	})
 }
 
+func GetPhoneCode(ctx iris.Context) {
+	
+}
+
 func PostUserRegisterByPhone(ctx iris.Context) {
 	// TODO: phone register
 }
