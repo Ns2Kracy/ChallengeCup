@@ -15,12 +15,13 @@ func InitRoute(r *iris.Application) {
 	v1.Get("/monitor", middleware.Monitor.View)
 	
 	v1.Post("/user/login", controller.PostUserLogin)
-	v1.Post("/user/register-by-name", controller.PostUserRegisterByUserNameAndPassword)
-	v1.Post("/user/register-by-phone", controller.PostUserRegisterByPhone)
-	v1.Post("/user/register-by-email", controller.PostUserRegisterByEmail)
+	v1.Post("/user/register/name", controller.PostUserRegisterByUserNameAndPassword)
+	v1.Post("/user/register/phone", controller.PostUserRegisterByPhone)
+	v1.Post("/user/register/email", controller.PostUserRegisterByEmail)
 	group := r.Party(v1.GetRelPath())
 	group.Use(middleware.JwtAuthMiddleware)
 	{
+		group.Post("/user/logout", controller.PostUserLogout)
 		group.Get("/user/info/{id:int}", controller.GetUserInfoById)
 		group.Get("/user/info/{username:string}", controller.GetUserInfoByName)
 	}

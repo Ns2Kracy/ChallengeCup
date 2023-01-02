@@ -1,14 +1,18 @@
 package code
 
 import (
+	"crypto/rand"
 	"fmt"
-	"math/rand"
 	"time"
+
+	"ChallengeCup/dao"
 )
 
-func RandomPhoneCode() string {
-	randomCode := rand.New(rand.NewSource(time.Now().UnixNano()))
-	// 生成6位随机数
-	code := fmt.Sprintf("%06v", randomCode.Int31n(1000000))
-	return code
+func RandomCode() string {
+	randomCode, err := rand.Prime(rand.Reader, 6)
+	if err != nil {
+		fmt.Println(err)
+	}
+	dao.RedisClient.Set(randomCode.String()[0:6], "validate_code", 300*time.Second)
+	return randomCode.String()[0:6]
 }

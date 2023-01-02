@@ -1,7 +1,10 @@
 package controller
 
 import (
+	"strconv"
 	"time"
+
+	"ChallengeCup/dao"
 
 	"ChallengeCup/common"
 	"ChallengeCup/middleware"
@@ -60,7 +63,11 @@ func PostUserRegisterByUserNameAndPassword(ctx iris.Context) {
 }
 
 func GetPhoneCode(ctx iris.Context) {
-	
+	// TODO: get phone code
+}
+
+func GetEmailCode(ctx iris.Context) {
+	// TODO: get email code
 }
 
 func PostUserRegisterByPhone(ctx iris.Context) {
@@ -69,6 +76,14 @@ func PostUserRegisterByPhone(ctx iris.Context) {
 
 func PostUserRegisterByEmail(ctx iris.Context) {
 	// TODO: email register
+}
+
+func PostActivateEmail(ctx iris.Context) {
+	// TODO: activate email
+}
+
+func PostActivatePhone(ctx iris.Context) {
+	// TODO: activate phone
 }
 
 func PostUserLogin(ctx iris.Context) {
@@ -108,14 +123,27 @@ func PostUserLogin(ctx iris.Context) {
 	}
 
 	token := model.ValidateToken{}
+	expireTime := 3 * time.Hour * time.Duration(1)
 	token.AccessToken = middleware.GetAccessToken(user.UserName, user.Password, user.ID)
 	token.RefreshToken = middleware.GetRefreshToken(user.UserName, user.Password, user.ID)
-	token.ExpiresIn = time.Now().Add(3 * time.Hour * time.Duration(1)).Unix()
+	token.ExpiresIn = time.Now().Add(expireTime).Unix()
+	dao.RedisClient.Set("access_token_"+strconv.Itoa(user.ID), token.AccessToken, expireTime)
+	dao.RedisClient.Set("refresh_token_"+strconv.Itoa(user.ID), token.RefreshToken, expireTime*24*7)
 
 	ctx.JSON(model.Result{
 		Code:    common.SUCCESS,
 		Message: common.Message(common.SUCCESS),
 		Data:    token,
+	})
+}
+
+func PostUserLogout(ctx iris.Context) {
+	id := ctx.GetHeader("id")
+	dao.RedisClient.Del("access_token_" + id)
+	dao.RedisClient.Del("refresh_token_" + id)
+	ctx.JSON(model.Result{
+		Code:    common.SUCCESS,
+		Message: common.Message(common.SUCCESS),
 	})
 }
 
