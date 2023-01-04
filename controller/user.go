@@ -4,9 +4,8 @@ import (
 	"strconv"
 	"time"
 
-	"ChallengeCup/dao"
-
 	"ChallengeCup/common"
+	"ChallengeCup/dao"
 	"ChallengeCup/middleware"
 	"ChallengeCup/model"
 	"ChallengeCup/service"
@@ -179,5 +178,135 @@ func GetUserInfoByName(ctx iris.Context) {
 		Code:    common.SUCCESS,
 		Message: common.Message(common.SUCCESS),
 		Data:    user,
+	})
+}
+
+func PutUserAvatar(ctx iris.Context) {
+	avatar := ctx.FormValue("avatar")
+	id := ctx.GetHeader("id")
+	if len(avatar) == 0 {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.INVALID_PARAMS),
+		})
+		return
+	}
+	user := service.Service.UserService.GetUserById(id)
+	if user.ID == 0 {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.USER_NOT_EXIST),
+		})
+		return
+	}
+	user.Avatar = avatar
+	service.Service.UserService.UpdateUser(user)
+	ctx.JSON(model.Result{
+		Code:    common.SUCCESS,
+		Message: common.Message(common.SUCCESS),
+	})
+}
+
+func PutUserName(ctx iris.Context) {
+	username := ctx.FormValue("username")
+	id := ctx.GetHeader("id")
+	if len(username) == 0 {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.INVALID_PARAMS),
+		})
+		return
+	}
+	user := service.Service.UserService.GetUserById(id)
+	if user.ID == 0 {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.USER_NOT_EXIST),
+		})
+		return
+	}
+	user.UserName = username
+	service.Service.UserService.UpdateUser(user)
+	ctx.JSON(model.Result{
+		Code:    common.SUCCESS,
+		Message: common.Message(common.SUCCESS),
+	})
+}
+
+func PutUserPassword(ctx iris.Context) {
+	password := ctx.FormValue("password")
+	id := ctx.GetHeader("id")
+	if len(password) == 0 {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.INVALID_PARAMS),
+		})
+		return
+	}
+	user := service.Service.UserService.GetUserById(id)
+	if user.ID == 0 {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.USER_NOT_EXIST),
+		})
+		return
+	}
+	user.Password = encrypt.EncryptPassword(password)
+	service.Service.UserService.UpdateUser(user)
+	ctx.JSON(model.Result{
+		Code:    common.SUCCESS,
+		Message: common.Message(common.SUCCESS),
+	})
+}
+
+func PutUserEmail(ctx iris.Context) {
+	email := ctx.FormValue("email")
+	id := ctx.GetHeader("id")
+	if len(email) == 0 {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.INVALID_PARAMS),
+		})
+		return
+	}
+	user := service.Service.UserService.GetUserById(id)
+	if user.ID == 0 {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.USER_NOT_EXIST),
+		})
+		return
+	}
+	user.Email = email
+	service.Service.UserService.UpdateUser(user)
+	ctx.JSON(model.Result{
+		Code:    common.SUCCESS,
+		Message: common.Message(common.SUCCESS),
+	})
+}
+
+func PutUserPhone(ctx iris.Context) {
+	phone := ctx.FormValue("phone")
+	id := ctx.GetHeader("id")
+	if len(phone) == 0 {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.INVALID_PARAMS),
+		})
+		return
+	}
+	user := service.Service.UserService.GetUserById(id)
+	if user.ID == 0 {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.USER_NOT_EXIST),
+		})
+		return
+	}
+	user.Phone = phone
+	service.Service.UserService.UpdateUser(user)
+	ctx.JSON(model.Result{
+		Code:    common.SUCCESS,
+		Message: common.Message(common.SUCCESS),
 	})
 }

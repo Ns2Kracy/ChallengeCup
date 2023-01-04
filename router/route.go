@@ -10,10 +10,6 @@ import (
 func InitRoute(r *iris.Application) {
 	r.UseGlobal(middleware.Cors())
 	v1 := r.Party("/api/v1")
-	iris.RegisterOnInterrupt(middleware.Monitor.Stop)
-	v1.Post("/monitor", middleware.Monitor.Stats)
-	v1.Get("/monitor", middleware.Monitor.View)
-	
 	v1.Post("/user/login", controller.PostUserLogin)
 	v1.Post("/user/register/name", controller.PostUserRegisterByUserNameAndPassword)
 	v1.Post("/user/register/phone", controller.PostUserRegisterByPhone)

@@ -1,8 +1,10 @@
 package file
 
-import "os"
+import (
+	"os"
+)
 
-// IsExist 
+// IsExist
 func IsExist(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil || os.IsExist(err)

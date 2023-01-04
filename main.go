@@ -16,7 +16,7 @@ func main() {
 	if err != nil {
 		return
 	}
-
+	
 	listener, err := net.Listen("tcp", conf.System.Host+":"+conf.System.Port)
 	if err != nil {
 		return
@@ -29,7 +29,7 @@ func main() {
 		iris.WithOptimizations,
 		iris.WithConfiguration(iris.Configuration{
 			Charset:  "UTF-8",
-			LogLevel: conf.System.Mode,
+			LogLevel: "DEBUG",
 		}),
 		iris.WithTimeFormat("2006-01-02 15:04:05"),
 	); err != nil {

@@ -1,9 +1,8 @@
 package config
 
 import (
-	"os"
-
 	"ChallengeCup/utils/file"
+	"os"
 
 	"gopkg.in/yaml.v3"
 )

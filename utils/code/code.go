@@ -3,9 +3,8 @@ package code
 import (
 	"crypto/rand"
 	"fmt"
-	"time"
-
-	"ChallengeCup/dao"
+	// "time"
+	// "ChallengeCup/dao"
 )
 
 func RandomCode() string {
@@ -13,6 +12,6 @@ func RandomCode() string {
 	if err != nil {
 		fmt.Println(err)
 	}
-	dao.RedisClient.Set(randomCode.String()[0:6], "validate_code", 300*time.Second)
+	// dao.RedisClient.Set(randomCode.String()[0:6], "validate_code", 300*time.Second)
 	return randomCode.String()[0:6]
 }
