@@ -15,7 +15,7 @@ import (
 	"github.com/kataras/iris/v12"
 )
 
-func PostUserRegisterByUserNameAndPassword(ctx iris.Context) {
+func PostUserRegisterByUserName(ctx iris.Context) {
 	userRequest := &model.User{}
 	if err := ctx.ReadJSON(userRequest); err != nil {
 		ctx.JSON(model.Result{
@@ -61,6 +61,10 @@ func PostUserRegisterByUserNameAndPassword(ctx iris.Context) {
 	})
 }
 
+func PostUserRegisterByEmail(ctx iris.Context) {
+	// TODO: email register
+}
+
 func GetPhoneCode(ctx iris.Context) {
 	// TODO: get phone code
 }
@@ -73,16 +77,13 @@ func PostUserRegisterByPhone(ctx iris.Context) {
 	// TODO: phone register
 }
 
-func PostUserRegisterByEmail(ctx iris.Context) {
-	// TODO: email register
-}
-
 func PostActivateEmail(ctx iris.Context) {
 	// TODO: activate email
 }
 
 func PostActivatePhone(ctx iris.Context) {
 	// TODO: activate phone
+	ctx.Next()
 }
 
 func PostUserLogin(ctx iris.Context) {
@@ -126,9 +127,8 @@ func PostUserLogin(ctx iris.Context) {
 	token.AccessToken = middleware.GetAccessToken(user.UserName, user.Password, user.ID)
 	token.RefreshToken = middleware.GetRefreshToken(user.UserName, user.Password, user.ID)
 	token.ExpiresIn = time.Now().Add(expireTime).Unix()
-	dao.RedisClient.Set("access_token_"+strconv.Itoa(user.ID), token.AccessToken, expireTime)
-	dao.RedisClient.Set("refresh_token_"+strconv.Itoa(user.ID), token.RefreshToken, expireTime*24*7)
-
+	dao.RedisClient.Set(ctx, "AccessToken_"+strconv.Itoa(user.ID), token.AccessToken+strconv.Itoa(user.ID), expireTime)
+	dao.RedisClient.Set(ctx, "RefreshToken_"+strconv.Itoa(user.ID), token.RefreshToken+strconv.Itoa(user.ID), expireTime)
 	ctx.JSON(model.Result{
 		Code:    common.SUCCESS,
 		Message: common.Message(common.SUCCESS),
@@ -138,16 +138,20 @@ func PostUserLogin(ctx iris.Context) {
 
 func PostUserLogout(ctx iris.Context) {
 	id := ctx.GetHeader("id")
-	dao.RedisClient.Del("access_token_" + id)
-	dao.RedisClient.Del("refresh_token_" + id)
+	dao.RedisClient.Del(ctx, "AccessToken_"+id)
+	dao.RedisClient.Del(ctx, "RefreshToken_"+id)
 	ctx.JSON(model.Result{
 		Code:    common.SUCCESS,
 		Message: common.Message(common.SUCCESS),
 	})
 }
 
-func GetUserInfoById(ctx iris.Context) {
-	id := ctx.GetHeader("id")
+func PostRefreshToken(ctx iris.Context) {
+	// TODO: refresh token
+}
+
+func GetUserInfo(ctx iris.Context) {
+	id := ctx.Params().Get("id")
 	user := service.Service.UserService.GetUserById(id)
 	ctx.JSON(model.Result{
 		Code:    common.SUCCESS,
@@ -156,16 +160,17 @@ func GetUserInfoById(ctx iris.Context) {
 	})
 }
 
-func GetUserInfoByName(ctx iris.Context) {
-	username := ctx.Params().Get("username")
-	if len(username) == 0 {
+func PutUserInfo(ctx iris.Context) {
+	id := ctx.GetHeader("id")
+	updater := dbmodel.UserDBModel{}
+	if err := ctx.ReadJSON(&updater); err != nil {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.INVALID_PARAMS),
 		})
 		return
 	}
-	user := service.Service.UserService.GetUserByName(username)
+	user := service.Service.UserService.GetUserById(id)
 	if user.ID == 0 {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
@@ -173,11 +178,10 @@ func GetUserInfoByName(ctx iris.Context) {
 		})
 		return
 	}
-
+	service.Service.UserService.UpdateUser(updater)
 	ctx.JSON(model.Result{
 		Code:    common.SUCCESS,
 		Message: common.Message(common.SUCCESS),
-		Data:    user,
 	})
 }
 

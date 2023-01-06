@@ -5,23 +5,20 @@ go 1.19
 require github.com/kataras/iris/v12 v12.2.0-beta7.0.20221226212647-196063d4db34 // direct
 
 require (
+	github.com/go-redis/redis/v8 v8.11.5
 	github.com/go-sql-driver/mysql v1.7.0
+	github.com/sirupsen/logrus v1.9.0
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/mysql v1.4.4
 	gorm.io/gorm v1.24.2
 )
 
 require (
-	github.com/go-ole/go-ole v1.2.6 // indirect
+	github.com/cespare/xxhash/v2 v2.1.2 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
+	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
-	github.com/lufia/plan9stats v0.0.0-20220913051719-115f729f3c8c // indirect
-	github.com/power-devops/perfstat v0.0.0-20221212215047-62379fc7944b // indirect
-	github.com/shirou/gopsutil/v3 v3.22.12 // indirect
-	github.com/sirupsen/logrus v1.9.0 // indirect
-	github.com/tklauser/go-sysconf v0.3.11 // indirect
-	github.com/tklauser/numcpus v0.6.0 // indirect
-	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 )
 
 require (
@@ -35,7 +32,6 @@ require (
 	github.com/eknkc/amber v0.0.0-20171010120322-cdade1c07385 // indirect
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/flosch/pongo2/v4 v4.0.2 // indirect
-	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/golang-jwt/jwt/v4 v4.4.3
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/uuid v1.3.0 // indirect

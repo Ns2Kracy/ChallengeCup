@@ -5,3 +5,7 @@ type ValidateToken struct {
 	RefreshToken string
 	ExpiresIn    int64
 }
+
+type RefreshToken struct {
+	RefreshToken string `json:"refresh_token"`
+}

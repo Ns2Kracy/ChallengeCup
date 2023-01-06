@@ -6,11 +6,12 @@ const (
 	CLIENT_ERROR = 400
 	AUTH_ERROR   = 401
 
-	INVALID_PARAMS  = 10001
-	SIMPLE_PASSWORD = 10002
-	USER_EXIST      = 10003
-	ERROR_PASSWORD  = 10004
-	USER_NOT_EXIST  = 10005
+	INVALID_PARAMS        = 10001
+	SIMPLE_PASSWORD       = 10002
+	USER_EXIST            = 10003
+	ERROR_PASSWORD        = 10004
+	USER_NOT_EXIST        = 10005
+	INVALID_REFRESH_TOKEN = 10006
 )
 
 var message = map[int]string{
@@ -19,11 +20,12 @@ var message = map[int]string{
 	CLIENT_ERROR: "Client Error",
 	AUTH_ERROR:   "Auth Error",
 
-	INVALID_PARAMS:  "Invalid Params",
-	SIMPLE_PASSWORD: "Password is too simple",
-	USER_EXIST:      "User already exist",
-	ERROR_PASSWORD:  "Password is wrong",
-	USER_NOT_EXIST:  "User not exist",
+	INVALID_PARAMS:        "Invalid Params",
+	SIMPLE_PASSWORD:       "Password is too simple",
+	USER_EXIST:            "User already exist",
+	ERROR_PASSWORD:        "Password is wrong",
+	USER_NOT_EXIST:        "User not exist",
+	INVALID_REFRESH_TOKEN: "Invalid refresh token",
 }
 
 func Message(code int) string {

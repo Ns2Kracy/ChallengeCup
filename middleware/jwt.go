@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"ChallengeCup/common"
+	"ChallengeCup/dao"
 	"ChallengeCup/model"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -31,7 +32,11 @@ var (
 	}
 	extractor = func(ctx iris.Context) (string, error) {
 		auth := ctx.GetHeader("Authorization")
+		id := ctx.GetHeader("id")
 		if auth == "" {
+			return "", nil
+		}
+		if auth != dao.RedisClient.Get(ctx, "AccessToken_"+id).Val() {
 			return "", nil
 		}
 		return auth, nil

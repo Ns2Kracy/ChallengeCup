@@ -2,8 +2,7 @@ package dao
 
 import (
 	"ChallengeCup/config"
-
-	"github.com/go-redis/redis"
+	"github.com/go-redis/redis/v8"
 )
 
 var RedisClient = NewRedis()
@@ -15,10 +14,5 @@ func NewRedis() *redis.Client {
 		Password: conf.Password,
 		DB:       conf.DB,
 	})
-
-	err := client.Ping().Err()
-	if err != nil {
-		panic(err)
-	}
 	return client
 }
