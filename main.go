@@ -6,6 +6,7 @@ import (
 	"ChallengeCup/config"
 	"ChallengeCup/router"
 
+
 	"github.com/kataras/iris/v12"
 )
 
@@ -29,7 +30,7 @@ func main() {
 		iris.WithOptimizations,
 		iris.WithConfiguration(iris.Configuration{
 			Charset:  "UTF-8",
-			LogLevel: "DEBUG",
+			LogLevel: "DISABLED",
 		}),
 		iris.WithTimeFormat("2006-01-02 15:04:05"),
 	); err != nil {

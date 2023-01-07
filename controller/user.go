@@ -136,6 +136,14 @@ func PostUserLogin(ctx iris.Context) {
 	})
 }
 
+func PostUserLoginByPhone(ctx iris.Context) {
+	// TODO: phone login
+}
+
+func PostUserLoginByEmail(ctx iris.Context) {
+	// TODO: email login
+}
+
 func PostUserLogout(ctx iris.Context) {
 	id := ctx.GetHeader("id")
 	dao.RedisClient.Del(ctx, "AccessToken_"+id)

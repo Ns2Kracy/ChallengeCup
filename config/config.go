@@ -3,7 +3,7 @@ package config
 import (
 	"ChallengeCup/utils/file"
 	"os"
-
+	log "ChallengeCup/utils/logger"
 	"gopkg.in/yaml.v3"
 )
 
@@ -37,6 +37,7 @@ func NewConfig(path string) (*Config, error) {
 		},
 	}
 	if !file.IsExist(path) {
+		log.Info("Config file not found, creating a new one...")
 		f, _ := file.NewFile(path)
 		encoder := yaml.NewEncoder(f)
 		err := encoder.Encode(config)

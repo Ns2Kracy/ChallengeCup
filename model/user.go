@@ -8,9 +8,11 @@ type User struct {
 type PhoneRegister struct {
 	Phone    string `json:"phone"`
 	Password string `json:"password"`
+	Code     string `json:"code"`
 }
 
 type EmailRegister struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+	Code     string `json:"code"`
 }
