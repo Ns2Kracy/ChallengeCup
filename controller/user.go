@@ -11,6 +11,7 @@ import (
 	"ChallengeCup/service"
 	"ChallengeCup/service/dbmodel"
 	"ChallengeCup/utils/encrypt"
+	"ChallengeCup/utils/uid"
 
 	"github.com/kataras/iris/v12"
 )
@@ -52,6 +53,7 @@ func PostUserRegisterByUserName(ctx iris.Context) {
 	newUser := dbmodel.UserDBModel{}
 	newUser.UserName = userRequest.UserName
 	newUser.Password = encrypt.EncryptPassword(userRequest.Password)
+	newUser.UID = uid.GenerateUID()
 
 	newUser = service.Service.UserService.NewUser(newUser)
 
@@ -106,7 +108,7 @@ func PostUserLogin(ctx iris.Context) {
 
 	user := service.Service.UserService.GetUserByName(userRequest.UserName)
 
-	if user.ID == 0 {
+	if user.UID == 0 {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.USER_NOT_EXIST),
@@ -124,11 +126,11 @@ func PostUserLogin(ctx iris.Context) {
 
 	token := model.ValidateToken{}
 	expireTime := 3 * time.Hour * time.Duration(1)
-	token.AccessToken = middleware.GetAccessToken(user.UserName, user.Password, user.ID)
-	token.RefreshToken = middleware.GetRefreshToken(user.UserName, user.Password, user.ID)
+	token.AccessToken = middleware.GetAccessToken(user.UserName, user.Password, user.UID)
+	token.RefreshToken = middleware.GetRefreshToken(user.UserName, user.Password, user.UID)
 	token.ExpiresIn = time.Now().Add(expireTime).Unix()
-	dao.RedisClient.Set(ctx, "AccessToken_"+strconv.Itoa(user.ID), token.AccessToken+strconv.Itoa(user.ID), expireTime)
-	dao.RedisClient.Set(ctx, "RefreshToken_"+strconv.Itoa(user.ID), token.RefreshToken+strconv.Itoa(user.ID), expireTime)
+	dao.RedisClient.Set(ctx, "AccessToken_"+strconv.Itoa(user.UID), token.AccessToken+strconv.Itoa(user.UID), expireTime)
+	dao.RedisClient.Set(ctx, "RefreshToken_"+strconv.Itoa(user.UID), token.RefreshToken+strconv.Itoa(user.UID), expireTime)
 	ctx.JSON(model.Result{
 		Code:    common.SUCCESS,
 		Message: common.Message(common.SUCCESS),
@@ -145,9 +147,9 @@ func PostUserLoginByEmail(ctx iris.Context) {
 }
 
 func PostUserLogout(ctx iris.Context) {
-	id := ctx.GetHeader("id")
-	dao.RedisClient.Del(ctx, "AccessToken_"+id)
-	dao.RedisClient.Del(ctx, "RefreshToken_"+id)
+	uid := ctx.GetHeader("uuuuid")
+	dao.RedisClient.Del(ctx, "AccessToken_"+uid)
+	dao.RedisClient.Del(ctx, "RefreshToken_"+uid)
 	ctx.JSON(model.Result{
 		Code:    common.SUCCESS,
 		Message: common.Message(common.SUCCESS),
@@ -159,8 +161,8 @@ func PostRefreshToken(ctx iris.Context) {
 }
 
 func GetUserInfo(ctx iris.Context) {
-	id := ctx.Params().Get("id")
-	user := service.Service.UserService.GetUserById(id)
+	uid := ctx.Params().Get("uuuuid")
+	user := service.Service.UserService.GetUserByUID(uid)
 	ctx.JSON(model.Result{
 		Code:    common.SUCCESS,
 		Message: common.Message(common.SUCCESS),
@@ -169,7 +171,7 @@ func GetUserInfo(ctx iris.Context) {
 }
 
 func PutUserInfo(ctx iris.Context) {
-	id := ctx.GetHeader("id")
+	uid := ctx.GetHeader("uuuuid")
 	updater := dbmodel.UserDBModel{}
 	if err := ctx.ReadJSON(&updater); err != nil {
 		ctx.JSON(model.Result{
@@ -178,8 +180,8 @@ func PutUserInfo(ctx iris.Context) {
 		})
 		return
 	}
-	user := service.Service.UserService.GetUserById(id)
-	if user.ID == 0 {
+	user := service.Service.UserService.GetUserByUID(uid)
+	if user.UID == 0 {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.USER_NOT_EXIST),
@@ -195,7 +197,7 @@ func PutUserInfo(ctx iris.Context) {
 
 func PutUserAvatar(ctx iris.Context) {
 	avatar := ctx.FormValue("avatar")
-	id := ctx.GetHeader("id")
+	uid := ctx.GetHeader("uid")
 	if len(avatar) == 0 {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
@@ -203,8 +205,8 @@ func PutUserAvatar(ctx iris.Context) {
 		})
 		return
 	}
-	user := service.Service.UserService.GetUserById(id)
-	if user.ID == 0 {
+	user := service.Service.UserService.GetUserByUID(uid)
+	if user.UID == 0 {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.USER_NOT_EXIST),
@@ -221,7 +223,7 @@ func PutUserAvatar(ctx iris.Context) {
 
 func PutUserName(ctx iris.Context) {
 	username := ctx.FormValue("username")
-	id := ctx.GetHeader("id")
+	uid := ctx.GetHeader("uid")
 	if len(username) == 0 {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
@@ -229,8 +231,8 @@ func PutUserName(ctx iris.Context) {
 		})
 		return
 	}
-	user := service.Service.UserService.GetUserById(id)
-	if user.ID == 0 {
+	user := service.Service.UserService.GetUserByUID(uid)
+	if user.UID == 0 {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.USER_NOT_EXIST),
@@ -247,7 +249,7 @@ func PutUserName(ctx iris.Context) {
 
 func PutUserPassword(ctx iris.Context) {
 	password := ctx.FormValue("password")
-	id := ctx.GetHeader("id")
+	uid := ctx.GetHeader("uuuuid")
 	if len(password) == 0 {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
@@ -255,8 +257,8 @@ func PutUserPassword(ctx iris.Context) {
 		})
 		return
 	}
-	user := service.Service.UserService.GetUserById(id)
-	if user.ID == 0 {
+	user := service.Service.UserService.GetUserByUID(uid)
+	if user.UID == 0 {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.USER_NOT_EXIST),
@@ -273,7 +275,7 @@ func PutUserPassword(ctx iris.Context) {
 
 func PutUserEmail(ctx iris.Context) {
 	email := ctx.FormValue("email")
-	id := ctx.GetHeader("id")
+	uid := ctx.GetHeader("uuuuid")
 	if len(email) == 0 {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
@@ -281,8 +283,8 @@ func PutUserEmail(ctx iris.Context) {
 		})
 		return
 	}
-	user := service.Service.UserService.GetUserById(id)
-	if user.ID == 0 {
+	user := service.Service.UserService.GetUserByUID(uid)
+	if user.UID == 0 {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.USER_NOT_EXIST),
@@ -299,7 +301,7 @@ func PutUserEmail(ctx iris.Context) {
 
 func PutUserPhone(ctx iris.Context) {
 	phone := ctx.FormValue("phone")
-	id := ctx.GetHeader("id")
+	uid := ctx.GetHeader("uuuuid")
 	if len(phone) == 0 {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
@@ -307,8 +309,8 @@ func PutUserPhone(ctx iris.Context) {
 		})
 		return
 	}
-	user := service.Service.UserService.GetUserById(id)
-	if user.ID == 0 {
+	user := service.Service.UserService.GetUserByUID(uid)
+	if user.UID == 0 {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.USER_NOT_EXIST),
