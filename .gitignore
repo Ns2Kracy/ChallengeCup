@@ -8,6 +8,7 @@
 *.exe
 
 # Ignore log files
+log
 *.log
 
 # Ignore temp directories

@@ -5,7 +5,6 @@ go 1.19
 require github.com/kataras/iris/v12 v12.2.0-beta7.0.20221226212647-196063d4db34 // direct
 
 require (
-	github.com/go-redis/redis/v8 v8.11.5
 	github.com/go-sql-driver/mysql v1.7.0
 	github.com/sirupsen/logrus v1.9.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1
@@ -13,12 +12,14 @@ require (
 	gorm.io/gorm v1.24.2
 )
 
-require github.com/rs/xid v1.4.0
+require (
+	github.com/go-redis/redis/v9 v9.0.0-rc.2
+	github.com/rs/xid v1.4.0
+)
 
 require (
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
-	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 )

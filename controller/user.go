@@ -69,6 +69,15 @@ func PostUserRegisterByEmail(ctx iris.Context) {
 
 func GetPhoneCode(ctx iris.Context) {
 	// TODO: get phone code
+	userRequest := &model.PhoneRegister{}
+	if err := ctx.ReadJSON(userRequest); err != nil {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.INVALID_PARAMS),
+		})
+		return
+	}
+	// ValidateCode := code.RandomCode()
 }
 
 func GetEmailCode(ctx iris.Context) {
@@ -85,7 +94,18 @@ func PostActivateEmail(ctx iris.Context) {
 
 func PostActivatePhone(ctx iris.Context) {
 	// TODO: activate phone
-	ctx.Next()
+	code := ctx.URLParam("phone_code")
+	if code != dao.RedisClient.Get(ctx, "phone_code").String() {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.CLIENT_ERROR),
+		})
+	}
+
+	ctx.JSON(model.Result{
+		Code:    common.SUCCESS,
+		Message: common.Message(common.SUCCESS),
+	})
 }
 
 func PostUserLogin(ctx iris.Context) {
@@ -129,8 +149,8 @@ func PostUserLogin(ctx iris.Context) {
 	token.AccessToken = middleware.GetAccessToken(user.UserName, user.Password, user.UID)
 	token.RefreshToken = middleware.GetRefreshToken(user.UserName, user.Password, user.UID)
 	token.ExpiresIn = time.Now().Add(expireTime).Unix()
-	dao.RedisClient.Set(ctx, "AccessToken_"+strconv.Itoa(user.UID), token.AccessToken+strconv.Itoa(user.UID), expireTime)
-	dao.RedisClient.Set(ctx, "RefreshToken_"+strconv.Itoa(user.UID), token.RefreshToken+strconv.Itoa(user.UID), expireTime)
+	dao.RedisClient.Set(dao.RedisCtx, "AccessToken_"+strconv.Itoa(user.UID), token.AccessToken+strconv.Itoa(user.UID), expireTime)
+	dao.RedisClient.Set(dao.RedisCtx, "RefreshToken_"+strconv.Itoa(user.UID), token.RefreshToken+strconv.Itoa(user.UID), expireTime)
 	ctx.JSON(model.Result{
 		Code:    common.SUCCESS,
 		Message: common.Message(common.SUCCESS),
