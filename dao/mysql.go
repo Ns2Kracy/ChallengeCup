@@ -1,7 +1,7 @@
 package dao
 
 import (
-	"log"
+	log "ChallengeCup/utils/logger"
 
 	"ChallengeCup/config"
 	"ChallengeCup/service/dbmodel"
@@ -23,7 +23,7 @@ func InitMysql() *gorm.DB {
 	}
 	db, err := gorm.Open(mysql.New(mysqlConfig), &gorm.Config{})
 	if err != nil {
-		log.Println("mysql connect error: ", err)
+		log.Infof("mysql connect error: ", err)
 		return nil
 	}
 	sqlDB, err := db.DB()
@@ -37,5 +37,6 @@ func InitMysql() *gorm.DB {
 	if err != nil {
 		return nil
 	}
+	log.Info("mysql connect success")
 	return db
 }

@@ -74,11 +74,3 @@ func GetAccessToken(username, pwd string, id int) string {
 	}
 	return token
 }
-
-func GetRefreshToken(username, pwd string, id int) string {
-	token, err := GenerateToken(username, pwd, id, "refresh", 7*24*time.Hour*time.Duration(1))
-	if err != nil {
-		return ""
-	}
-	return token
-}

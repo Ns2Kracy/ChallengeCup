@@ -2,8 +2,8 @@ package uid
 
 import "testing"
 
-func TestUID(t *testing.T) {
-	uid := GenerateUID()
+func TestUUID(t *testing.T) {
+	uid := GenerateUUID()
 	t.Log(uid)
 	println(uid)
 }
