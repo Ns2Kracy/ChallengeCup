@@ -1,17 +1,12 @@
 package dao
 
 import (
-	"context"
-
 	"ChallengeCup/config"
 
 	"github.com/go-redis/redis/v9"
 )
 
-var (
-	RedisClient = NewRedis()
-	RedisCtx    = context.Background()
-)
+var RedisClient = NewRedis()
 
 func NewRedis() *redis.Client {
 	conf := config.LoadConfig().Redis

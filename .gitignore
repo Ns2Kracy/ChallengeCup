@@ -24,3 +24,5 @@ common/jwt_secret.go
 # Added by cargo
 
 /target
+
+./docs

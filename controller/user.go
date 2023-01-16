@@ -9,28 +9,23 @@ import (
 	"ChallengeCup/model"
 	"ChallengeCup/service"
 	"ChallengeCup/service/dbmodel"
-	"ChallengeCup/utils/code"
 	"ChallengeCup/utils/encrypt"
-	uid "ChallengeCup/utils/uuid"
+	log "ChallengeCup/utils/logger"
+	uuid "ChallengeCup/utils/uuid"
 	"ChallengeCup/utils/verify"
 
 	"github.com/kataras/iris/v12"
 )
 
-// @Summary 用户使用用户名注册
-// @Description 用户使用用户名注册
-// @Accept  json
-// @Produce  json
-// @Param   username	 query    string     true        "用户名"
-// @Success 200 {object} model.Result "Success"
-// @Router /api/v1/user/register [post]
 func PostUserRegisterByUserName(ctx iris.Context) {
 	userRequest := &model.UserNameRegister{}
+
 	if err := ctx.ReadJSON(userRequest); err != nil {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.INVALID_PARAMS),
 		})
+		log.Errorf("User %s register failed, error: %s", userRequest.UserName, err)
 		return
 	}
 
@@ -39,12 +34,14 @@ func PostUserRegisterByUserName(ctx iris.Context) {
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.INVALID_PARAMS),
 		})
+		log.Errorf("User %s register failed, the username or password is empty", userRequest.UserName)
 		return
 	} else if len(userRequest.UserName) < 6 || len(userRequest.Password) < 6 {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.SIMPLE_PASSWORD),
 		})
+		log.Errorf("User %s register failed, the username or password is too simple", userRequest.UserName)
 		return
 	}
 
@@ -55,15 +52,93 @@ func PostUserRegisterByUserName(ctx iris.Context) {
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.USER_EXIST),
 		})
+		log.Errorf("User %s register failed, the username has been registered", userRequest.UserName)
 		return
 	}
 
-	newUser := dbmodel.UserDBModel{}
-	newUser.UserName = userRequest.UserName
-	newUser.Password = encrypt.EncryptPassword(userRequest.Password)
-	newUser.UUID = uid.GenerateUUID()
+	newUser := dbmodel.UserDBModel{
+		UUID:     uuid.GenerateUUID(),
+		UserName: userRequest.UserName,
+		Password: encrypt.EncryptPassword(userRequest.Password),
+	}
 
 	newUser = service.Service.UserService.NewUser(newUser)
+
+	log.Infof("User %s register success", newUser.UserName)
+
+	ctx.JSON(model.Result{
+		Code:    common.SUCCESS,
+		Message: common.Message(common.SUCCESS),
+	})
+}
+
+func PostUserRegisterByPhone(ctx iris.Context) {
+	userRequest := &model.PhoneRegister{}
+
+	if err := ctx.ReadJSON(userRequest); err != nil {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.INVALID_PARAMS),
+		})
+		log.Errorf("register failed, invalid params")
+		return
+	}
+
+	if !verify.VerifyPhone(userRequest.Phone) {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.INVALID_PARAMS),
+		})
+		log.Errorf("register failed, invalid phone number")
+		return
+	}
+
+	if userRequest.Code != dao.RedisClient.Get(ctx, "phone_code_"+userRequest.Phone).String() {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.CLIENT_ERROR),
+		})
+		log.Errorf("register failed, invalid phone code")
+		return
+	}
+
+	if len(userRequest.Password) == 0 {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.INVALID_PARAMS),
+		})
+		log.Infof("register failed, the password is empty")
+		return
+	} else if len(userRequest.Password) < 6 {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.SIMPLE_PASSWORD),
+		})
+		log.Infof("register failed, the password is too simple")
+		return
+	}
+
+	checkUserExist := service.Service.UserService.IsExistByName(userRequest.Phone)
+
+	if checkUserExist {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.USER_EXIST),
+		})
+		log.Errorf("Phone %s register failed, this phone has been registered", userRequest.Phone)
+		return
+	}
+
+	newUser := dbmodel.UserDBModel{
+		UUID:     uuid.GenerateUUID(),
+		UserName: userRequest.Phone,
+		Password: encrypt.EncryptPassword(userRequest.Password),
+		Phone:    userRequest.Phone,
+	}
+
+	newUser = service.Service.UserService.NewUser(newUser)
+
+	log.Infof("Phone %s register success", newUser.Phone)
 
 	ctx.JSON(model.Result{
 		Code:    common.SUCCESS,
@@ -72,29 +147,107 @@ func PostUserRegisterByUserName(ctx iris.Context) {
 }
 
 func PostUserRegisterByEmail(ctx iris.Context) {
-	// TODO: email register
+	userRequest := &model.EmailRegister{}
+
+	if err := ctx.ReadJSON(userRequest); err != nil {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.INVALID_PARAMS),
+		})
+		log.Infof("Email %s register failed, error: %s", userRequest.Email, err)
+		return
+	}
+	if !verify.VerifyEmail(userRequest.Email) {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.INVALID_PARAMS),
+		})
+		log.Infof("Email %s register failed, invalid email address", userRequest.Email)
+		return
+	}
+
+	if userRequest.Code != dao.RedisClient.Get(ctx, "email_code_"+userRequest.Email).String() {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.CLIENT_ERROR),
+		})
+		log.Infof("Email %s register failed, invalid email code", userRequest.Email)
+		return
+	}
+
+	if len(userRequest.Password) == 0 {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.INVALID_PARAMS),
+		})
+		log.Infof("Email %s register failed, the password is empty", userRequest.Email)
+		return
+	} else if len(userRequest.Password) < 6 {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.SIMPLE_PASSWORD),
+		})
+		log.Infof("Email %s register failed, the password is too simple", userRequest.Email)
+		return
+	}
+
+	checkUserExist := service.Service.UserService.IsExistByName(userRequest.Email)
+
+	if checkUserExist {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.USER_EXIST),
+		})
+		log.Infof("Email %s register failed, the email has been registered", userRequest.Email)
+		return
+	}
+
+	newUser := dbmodel.UserDBModel{
+		UUID:     uuid.GenerateUUID(),
+		UserName: userRequest.Email,
+		Password: encrypt.EncryptPassword(userRequest.Password),
+		Email:    userRequest.Email,
+	}
+
+	newUser = service.Service.UserService.NewUser(newUser)
+
+	log.Infof("Email %s register success", newUser.UserName)
+
+	ctx.JSON(model.Result{
+		Code:    common.SUCCESS,
+		Message: common.Message(common.SUCCESS),
+	})
 }
 
 func GetPhoneCode(ctx iris.Context) {
 	phone := ctx.FormValue("phone")
+
 	if !verify.VerifyPhone(phone) {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.INVALID_PARAMS),
 		})
+		log.Errorf("Phone %s get code failed, invalid phone number", phone)
 		return
 	}
-	ValidateCode := code.RandomCode()
+
+	ValidateCode := verify.RandomCode()
+
 	go func() {
 		dao.RedisClient.Set(ctx, "phone_code_"+phone, ValidateCode, time.Minute*5)
-		err := code.PhoneSendCode(phone, ValidateCode)
+		log.Infof("caching phone code %s to redis", ValidateCode)
+		err := verify.PhoneSendCode(phone, ValidateCode)
 		if err != nil {
 			ctx.JSON(model.Result{
 				Code:    common.CLIENT_ERROR,
 				Message: common.Message(common.CLIENT_ERROR),
 			})
+			log.Errorf("sending verification code to phone %s failed, error: %s", phone, err)
 		}
 	}()
+
+	log.Infof("sending verification code to phone %s success", phone)
+
 	ctx.JSON(model.Result{
 		Code:    common.SUCCESS,
 		Message: common.Message(common.SUCCESS),
@@ -103,79 +256,58 @@ func GetPhoneCode(ctx iris.Context) {
 }
 
 func GetEmailCode(ctx iris.Context) {
-	// TODO: get email code
-}
+	email := ctx.FormValue("email")
 
-func PostUserRegisterByPhone(ctx iris.Context) {
-	userRequest := &model.PhoneRegister{}
-	if userRequest.Code == dao.RedisClient.Get(ctx, "phone_code_"+userRequest.Phone).String() {
-		ctx.JSON(model.Result{
-			Code:    common.SUCCESS,
-			Message: common.Message(common.SUCCESS),
-		})
-	} else {
+	if !verify.VerifyEmail(email) {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
-			Message: common.Message(common.CLIENT_ERROR),
+			Message: common.Message(common.INVALID_PARAMS),
 		})
-	}
-	checkUserExist := service.Service.UserService.IsExistByName(userRequest.Phone)
-
-	if checkUserExist {
-		ctx.JSON(model.Result{
-			Code:    common.CLIENT_ERROR,
-			Message: common.Message(common.USER_EXIST),
-		})
+		log.Errorf("invalid email address")
 		return
 	}
 
-	newUser := dbmodel.UserDBModel{}
-	newUser.Phone = userRequest.Phone
-	newUser.UUID = uid.GenerateUUID()
-	newUser.UserName = userRequest.Phone
+	ValidateCode := verify.RandomCode()
 
-	newUser = service.Service.UserService.NewUser(newUser)
+	go func() {
+		dao.RedisClient.Set(ctx, "email_code_"+email, ValidateCode, time.Minute*5)
+		log.Infof("caching phone code %s to redis", ValidateCode)
+		err := verify.MailSendCode(email, ValidateCode)
+		if err != nil {
+			ctx.JSON(model.Result{
+				Code:    common.CLIENT_ERROR,
+				Message: common.Message(common.CLIENT_ERROR),
+			})
+			log.Errorf("sending verification code to email %s failed, error: %s", email, err)
+		}
+	}()
+
+	log.Infof("sending verification code to email %s success", email)
 
 	ctx.JSON(model.Result{
 		Code:    common.SUCCESS,
 		Message: common.Message(common.SUCCESS),
+		Data:    ValidateCode,
 	})
+}
+
+func PostActivatePhone(ctx iris.Context) {
+	// TODO: activate phone
 }
 
 func PostActivateEmail(ctx iris.Context) {
 	// TODO: activate email
 }
 
-func PostActivatePhone(ctx iris.Context) {
-	// phone := ctx.URLParam("phone")
-	// ValidateCode := ctx.URLParam("phone_code")
-	// err := code.SendSmsCode(phone, ValidateCode)
-	// if err != nil {
-	// 	ctx.JSON(model.Result{
-	// 		Code:    common.CLIENT_ERROR,
-	// 		Message: common.Message(common.CLIENT_ERROR),
-	// 	})
-	// }
-	// if ValidateCode != dao.RedisClient.Get(ctx, "phone_code").String() {
-	// 	ctx.JSON(model.Result{
-	// 		Code:    common.CLIENT_ERROR,
-	// 		Message: common.Message(common.CLIENT_ERROR),
-	// 	})
-	// }
-
-	// ctx.JSON(model.Result{
-	// 	Code:    common.SUCCESS,
-	// 	Message: common.Message(common.SUCCESS),
-	// })
-}
-
 func PostUserLogin(ctx iris.Context) {
 	userRequest := model.UserNameRegister{}
+
 	if err := ctx.ReadJSON(&userRequest); err != nil {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.INVALID_PARAMS),
 		})
+		log.Errorf("login failed, invalid params")
 		return
 	}
 
@@ -184,6 +316,7 @@ func PostUserLogin(ctx iris.Context) {
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.INVALID_PARAMS),
 		})
+		log.Errorf("login failed, username or password is empty")
 		return
 	}
 
@@ -194,6 +327,7 @@ func PostUserLogin(ctx iris.Context) {
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.USER_NOT_EXIST),
 		})
+		log.Errorf("user %s login failed, user not exist", userRequest.UserName)
 		return
 	}
 
@@ -202,14 +336,20 @@ func PostUserLogin(ctx iris.Context) {
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.ERROR_PASSWORD),
 		})
+		log.Errorf("user %s login failed, password is wrong", userRequest.UserName)
 		return
 	}
 
-	token := model.ValidateToken{}
-	expireTime := 3 * time.Hour * time.Duration(1)
-	token.AccessToken = middleware.GetAccessToken(user.UserName, user.Password, user.ID)
-	token.ExpiresIn = time.Now().Add(expireTime).Unix()
+	expireTime := 24 * time.Hour * time.Duration(1)
+	token := model.ValidateToken{
+		AccessToken: middleware.GetAccessToken(user.UserName, user.Password, user.ID),
+		ExpiresIn:   time.Now().Add(expireTime).Unix(),
+	}
 	dao.RedisClient.Set(ctx, "AccessToken_"+user.UUID, token.AccessToken+user.UUID, expireTime)
+	log.Infof("user %s login success, caching access token to redis", user.UserName)
+
+	log.Infof("user %s login success", user.UserName)
+
 	ctx.JSON(model.Result{
 		Code:    common.SUCCESS,
 		Message: common.Message(common.SUCCESS),

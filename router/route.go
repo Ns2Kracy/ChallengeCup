@@ -4,12 +4,9 @@ import (
 	"ChallengeCup/controller"
 	"ChallengeCup/middleware"
 
-	"github.com/iris-contrib/swagger/v12"
-	"github.com/iris-contrib/swagger/v12/swaggerFiles"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/middleware/logger"
 	"github.com/kataras/iris/v12/middleware/recover"
-	_ "ChallengeCup/docs"
 )
 
 func InitRoute(r *iris.Application) {
@@ -17,14 +14,6 @@ func InitRoute(r *iris.Application) {
 	r.Use(logger.New())
 	r.Use(recover.New())
 	r.Use(iris.Compression)
-
-	swaggerConfig := &swagger.Config{
-		URL:         "http://localhost:8080/swagger/swagger.json",
-		DeepLinking: true,
-	}
-	swaggerUI := swagger.CustomWrapHandler(swaggerConfig, swaggerFiles.Handler)
-	r.Get("/swagger", swaggerUI)
-	r.Get("/swagger/{any:path}", swaggerUI)
 
 	v1 := r.Party("/api/v1")
 	register_party := r.Party(v1.GetRelPath())

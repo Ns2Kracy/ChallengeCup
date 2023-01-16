@@ -12,26 +12,14 @@ require (
 	gorm.io/gorm v1.24.2
 )
 
-require (
-	github.com/go-redis/redis/v9 v9.0.0-rc.2
-	github.com/iris-contrib/swagger/v12 v12.2.0-alpha
-	github.com/swaggo/swag v1.8.9
-)
+require github.com/go-redis/redis/v9 v9.0.0-rc.2
 
 require (
-	github.com/KyleBanks/depth v1.2.1 // indirect
-	github.com/PuerkitoBio/purell v1.1.1 // indirect
-	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
-	github.com/go-openapi/jsonpointer v0.19.5 // indirect
-	github.com/go-openapi/jsonreference v0.19.6 // indirect
-	github.com/go-openapi/spec v0.20.4 // indirect
-	github.com/go-openapi/swag v0.19.15 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
-	golang.org/x/tools v0.1.12 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
+	github.com/kr/text v0.2.0 // indirect
 )
 
 require (
