@@ -8,13 +8,13 @@ import (
 
 type UserService interface {
 	DeleteAll()
-	DeleteByUID(uuid string)
+	DeleteByUUID(uuid string)
 	NewUser(user dbmodel.UserDBModel) dbmodel.UserDBModel
 	UpdateUser(user dbmodel.UserDBModel)
 	UploadAvatar(uuid string, avatar string)
 	IsExistByName(name string) bool
 	GetUserByName(name string) dbmodel.UserDBModel
-	GetUserByUID(uuid string) dbmodel.UserDBModel
+	GetUserByUUID(uuid string) dbmodel.UserDBModel
 }
 
 type userService struct {
@@ -31,8 +31,8 @@ func (u *userService) DeleteAll() {
 	u.db.Delete(&dbmodel.UserDBModel{})
 }
 
-func (u *userService) DeleteByUID(uuid string) {
-	u.db.Where("uid = ?", uuid).Delete(&dbmodel.UserDBModel{})
+func (u *userService) DeleteByUUID(uuid string) {
+	u.db.Where("uuid = ?", uuid).Delete(&dbmodel.UserDBModel{})
 }
 
 func (u *userService) NewUser(user dbmodel.UserDBModel) dbmodel.UserDBModel {
@@ -45,7 +45,7 @@ func (u *userService) UpdateUser(user dbmodel.UserDBModel) {
 }
 
 func (u *userService) UploadAvatar(uuid string, avatar string) {
-	u.db.Model(&dbmodel.UserDBModel{}).Where("uid = ?", uuid).Update("avatar", avatar)
+	u.db.Model(&dbmodel.UserDBModel{}).Where("uuid = ?", uuid).Update("avatar", avatar)
 }
 
 func (u *userService) IsExistByName(name string) bool {
@@ -60,8 +60,8 @@ func (u *userService) GetUserByName(name string) dbmodel.UserDBModel {
 	return user
 }
 
-func (u *userService) GetUserByUID(uid string) dbmodel.UserDBModel {
+func (u *userService) GetUserByUUID(uid string) dbmodel.UserDBModel {
 	user := dbmodel.UserDBModel{}
-	u.db.Where("uid = ?", uid).First(&user)
+	u.db.Where("uuid = ?", uid).First(&user)
 	return user
 }

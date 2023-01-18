@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"strconv"
 	"time"
 
 	"ChallengeCup/common"
@@ -57,8 +58,8 @@ func PostUserRegisterByUserName(ctx iris.Context) {
 	}
 
 	newUser := dbmodel.UserDBModel{
-		UUID:     uuid.GenerateUUID(),
 		UserName: userRequest.UserName,
+		UUID:     uuid.GenerateUUID(),
 		Password: encrypt.EncryptPassword(userRequest.Password),
 	}
 
@@ -345,10 +346,8 @@ func PostUserLogin(ctx iris.Context) {
 		AccessToken: middleware.GetAccessToken(user.UserName, user.Password, user.ID),
 		ExpiresIn:   time.Now().Add(expireTime).Unix(),
 	}
-	dao.RedisClient.Set(ctx, "AccessToken_"+user.UUID, token.AccessToken+user.UUID, expireTime)
+	dao.RedisClient.Set(ctx, "AccessToken_"+strconv.Itoa(int(user.UUID)), token.AccessToken, expireTime)
 	log.Infof("user %s login success, caching access token to redis", user.UserName)
-
-	log.Infof("user %s login success", user.UserName)
 
 	ctx.JSON(model.Result{
 		Code:    common.SUCCESS,
@@ -366,8 +365,9 @@ func PostUserLoginByEmail(ctx iris.Context) {
 }
 
 func PostUserLogout(ctx iris.Context) {
-	uid := ctx.GetHeader("uuid")
-	dao.RedisClient.Del(ctx, "AccessToken_"+uid)
+	uuid := ctx.GetHeader("uuid")
+	dao.RedisClient.Del(ctx, "AccessToken_"+uuid)
+	log.Infof("user logout success, delete access token from redis")
 	ctx.JSON(model.Result{
 		Code:    common.SUCCESS,
 		Message: common.Message(common.SUCCESS),
@@ -375,8 +375,8 @@ func PostUserLogout(ctx iris.Context) {
 }
 
 func GetUserInfo(ctx iris.Context) {
-	uid := ctx.Params().Get("uuid")
-	user := service.Service.UserService.GetUserByUID(uid)
+	uuid := ctx.Params().Get("uuid")
+	user := service.Service.UserService.GetUserByUUID(uuid)
 	ctx.JSON(model.Result{
 		Code:    common.SUCCESS,
 		Message: common.Message(common.SUCCESS),
@@ -385,7 +385,7 @@ func GetUserInfo(ctx iris.Context) {
 }
 
 func PutUserInfo(ctx iris.Context) {
-	uid := ctx.GetHeader("uuid")
+	uuid := ctx.GetHeader("uuid")
 	updater := dbmodel.UserDBModel{}
 	if err := ctx.ReadJSON(&updater); err != nil {
 		ctx.JSON(model.Result{
@@ -394,7 +394,7 @@ func PutUserInfo(ctx iris.Context) {
 		})
 		return
 	}
-	user := service.Service.UserService.GetUserByUID(uid)
+	user := service.Service.UserService.GetUserByUUID(uuid)
 	if user.ID == 0 {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
@@ -411,7 +411,7 @@ func PutUserInfo(ctx iris.Context) {
 
 func PutUserAvatar(ctx iris.Context) {
 	avatar := ctx.FormValue("avatar")
-	uid := ctx.GetHeader("uuid")
+	uuid := ctx.GetHeader("uuid")
 	if len(avatar) == 0 {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
@@ -419,7 +419,7 @@ func PutUserAvatar(ctx iris.Context) {
 		})
 		return
 	}
-	user := service.Service.UserService.GetUserByUID(uid)
+	user := service.Service.UserService.GetUserByUUID(uuid)
 	if user.ID == 0 {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
@@ -437,7 +437,7 @@ func PutUserAvatar(ctx iris.Context) {
 
 func PutUserName(ctx iris.Context) {
 	username := ctx.FormValue("username")
-	uid := ctx.GetHeader("uuid")
+	uuid := ctx.GetHeader("uuid")
 	if len(username) == 0 {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
@@ -445,7 +445,7 @@ func PutUserName(ctx iris.Context) {
 		})
 		return
 	}
-	user := service.Service.UserService.GetUserByUID(uid)
+	user := service.Service.UserService.GetUserByUUID(uuid)
 	if user.ID == 0 {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
@@ -463,7 +463,7 @@ func PutUserName(ctx iris.Context) {
 
 func PutUserPassword(ctx iris.Context) {
 	password := ctx.FormValue("password")
-	uid := ctx.GetHeader("uuid")
+	uuid := ctx.GetHeader("uuid")
 	if len(password) == 0 {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
@@ -471,7 +471,7 @@ func PutUserPassword(ctx iris.Context) {
 		})
 		return
 	}
-	user := service.Service.UserService.GetUserByUID(uid)
+	user := service.Service.UserService.GetUserByUUID(uuid)
 	if user.ID == 0 {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
@@ -489,7 +489,7 @@ func PutUserPassword(ctx iris.Context) {
 
 func PutUserEmail(ctx iris.Context) {
 	email := ctx.FormValue("email")
-	uid := ctx.GetHeader("uuid")
+	uuid := ctx.GetHeader("uuid")
 	if len(email) == 0 {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
@@ -497,7 +497,7 @@ func PutUserEmail(ctx iris.Context) {
 		})
 		return
 	}
-	user := service.Service.UserService.GetUserByUID(uid)
+	user := service.Service.UserService.GetUserByUUID(uuid)
 	if user.ID == 0 {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
@@ -515,7 +515,7 @@ func PutUserEmail(ctx iris.Context) {
 
 func PutUserPhone(ctx iris.Context) {
 	phone := ctx.FormValue("phone")
-	uid := ctx.GetHeader("uuid")
+	uuid := ctx.GetHeader("uuid")
 	if len(phone) == 0 {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
@@ -523,7 +523,7 @@ func PutUserPhone(ctx iris.Context) {
 		})
 		return
 	}
-	user := service.Service.UserService.GetUserByUID(uid)
+	user := service.Service.UserService.GetUserByUUID(uuid)
 	if user.ID == 0 {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,

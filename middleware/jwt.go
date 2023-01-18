@@ -32,11 +32,11 @@ var (
 	}
 	extractor = func(ctx iris.Context) (string, error) {
 		auth := ctx.GetHeader("Authorization")
-		id := ctx.GetHeader("id")
+		uuid := ctx.GetHeader("uuid")
 		if auth == "" {
 			return "", nil
 		}
-		if auth != dao.RedisClient.Get(ctx, "AccessToken_"+id).Val() {
+		if auth != dao.RedisClient.Get(ctx, "AccessToken_"+uuid).Val() {
 			return "", nil
 		}
 		return auth, nil

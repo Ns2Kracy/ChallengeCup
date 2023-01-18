@@ -1,9 +1,9 @@
 package uid
 
 import (
-	uuid "github.com/satori/go.uuid"
+	uuid "github.com/google/uuid"
 )
 
-func GenerateUUID() string {
-	return uuid.NewV4().String()
+func GenerateUUID() uint32 {
+	return uuid.New().ID()
 }
