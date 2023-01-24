@@ -37,7 +37,7 @@ func PostUserRegisterByUserName(ctx iris.Context) {
 		})
 		log.Errorf("User %s register failed, the username or password is empty", userRequest.UserName)
 		return
-	} else if len(userRequest.UserName) < 6 || len(userRequest.Password) < 6 {
+	} else if len(userRequest.UserName) < 6 || len(userRequest.Password) < 8 {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.SIMPLE_PASSWORD),
@@ -375,7 +375,7 @@ func PostUserLogout(ctx iris.Context) {
 }
 
 func GetUserInfo(ctx iris.Context) {
-	uuid := ctx.Params().Get("uuid")
+	uuid := ctx.GetHeader("uuid")
 	user := service.Service.UserService.GetUserByUUID(uuid)
 	ctx.JSON(model.Result{
 		Code:    common.SUCCESS,
@@ -436,7 +436,7 @@ func PutUserAvatar(ctx iris.Context) {
 }
 
 func PutUserName(ctx iris.Context) {
-	username := ctx.FormValue("username")
+	username := ctx.Params().Get("username")
 	uuid := ctx.GetHeader("uuid")
 	if len(username) == 0 {
 		ctx.JSON(model.Result{
@@ -462,7 +462,7 @@ func PutUserName(ctx iris.Context) {
 }
 
 func PutUserPassword(ctx iris.Context) {
-	password := ctx.FormValue("password")
+	password := ctx.Params().Get("password")
 	uuid := ctx.GetHeader("uuid")
 	if len(password) == 0 {
 		ctx.JSON(model.Result{
@@ -488,7 +488,7 @@ func PutUserPassword(ctx iris.Context) {
 }
 
 func PutUserEmail(ctx iris.Context) {
-	email := ctx.FormValue("email")
+	email := ctx.Params().Get("email")
 	uuid := ctx.GetHeader("uuid")
 	if len(email) == 0 {
 		ctx.JSON(model.Result{
@@ -514,7 +514,7 @@ func PutUserEmail(ctx iris.Context) {
 }
 
 func PutUserPhone(ctx iris.Context) {
-	phone := ctx.FormValue("phone")
+	phone := ctx.Params().Get("phone")
 	uuid := ctx.GetHeader("uuid")
 	if len(phone) == 0 {
 		ctx.JSON(model.Result{

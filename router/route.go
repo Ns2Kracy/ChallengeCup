@@ -14,6 +14,8 @@ func InitRoute(r *iris.Application) {
 	r.Use(logger.New())
 	r.Use(recover.New())
 	r.Use(iris.Compression)
+	r.AllowMethods(iris.MethodOptions)
+
 	user := r.Party("/user")
 	{
 		user.Post("/register", controller.PostUserRegisterByUserName)
@@ -26,10 +28,11 @@ func InitRoute(r *iris.Application) {
 		user.Get("/code/phone", controller.GetPhoneCode)
 		user.Post("/activate/email", controller.PostActivateEmail)
 		user.Post("/activate/phone", controller.PostActivatePhone)
+		user.Post("/logout", controller.PostUserLogout)
 
-		user.Party("/", middleware.JwtAuthMiddleware)
+		user.Party("/")
 		{
-			user.Post("/logout", controller.PostUserLogout)
+			user.Use(middleware.JwtAuthMiddleware)
 
 			user.Get("/info", controller.GetUserInfo)
 			user.Put("/info/update", controller.PutUserInfo)

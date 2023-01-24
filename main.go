@@ -20,6 +20,7 @@ func main() {
 	}
 	logFile := NewLogFile()
 	app.Logger().AddOutput(logFile)
+	
 	listener, err := net.Listen("tcp", conf.System.Host+":"+conf.System.Port)
 	if err != nil {
 		return
@@ -30,6 +31,7 @@ func main() {
 	if err := app.Run(
 		iris.Listener(listener),
 		iris.WithOptimizations,
+		iris.WithoutInterruptHandler,
 		iris.WithConfiguration(iris.Configuration{
 			Charset:  "UTF-8",
 			LogLevel: "DEBUG",
