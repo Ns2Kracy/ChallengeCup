@@ -1,6 +1,5 @@
 # Ignore configuration files
 *.json
-*.yml
 *.yaml
 
 
