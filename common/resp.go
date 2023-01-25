@@ -12,6 +12,9 @@ const (
 	ERROR_PASSWORD        = 10004
 	USER_NOT_EXIST        = 10005
 	INVALID_REFRESH_TOKEN = 10006
+	EMAIL_EXIST		   = 10007
+	PHONE_EXIST		   = 10008
+	CODE_VALIDATION_ERROR = 10009
 )
 
 var message = map[int]string{
@@ -26,6 +29,9 @@ var message = map[int]string{
 	ERROR_PASSWORD:        "Password is wrong",
 	USER_NOT_EXIST:        "User not exist",
 	INVALID_REFRESH_TOKEN: "Invalid refresh token",
+	EMAIL_EXIST:		   "Email already exist",
+	PHONE_EXIST:		   "Phone already exist",
+	CODE_VALIDATION_ERROR: "Code validation error",
 }
 
 func Message(code int) string {

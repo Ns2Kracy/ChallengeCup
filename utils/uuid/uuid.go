@@ -1,4 +1,4 @@
-package uid
+package uuid
 
 import (
 	uuid "github.com/google/uuid"

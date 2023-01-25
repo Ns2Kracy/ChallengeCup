@@ -20,7 +20,7 @@ type UserDBModel struct {
 	Avatar         string         `gorm:"column:avatar;type:varchar(255);" json:"avatar"`
 	EmailActivedAt int64          `gorm:"column:email_actived_at;<-:create;<-:update;autoUpdateTime" json:"email_actived_at"`
 	PhoneActivedAt int64          `gorm:"column:phone_actived_at;<-:create;<-:update;autoUpdateTime" json:"phone_actived_at"`
-	EmergencyPhone EmergencyPhone `gorm:"column:emergency_phone;type:json" json:"emergency_phone"`
+	EmergencyPhone EmergencyPhone `gorm:"column:emergency_phone;type:json;default:'[]'" json:"emergency_phone"`
 	CreatedAt      int64          `gorm:"column:created_at;<-:create;autoCreateTime" json:"created_at"`
 	UpdatedAt      int64          `gorm:"column:updated_at;<-:create;<-:update;autoUpdateTime" json:"updated_at"`
 }

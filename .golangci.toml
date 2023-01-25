@@ -13,7 +13,7 @@ enable = [
   #  "errcheck",
 ]
 
-disable = ["errcheck"]
+disable = ["errcheck","ineffassign"]
 
 [linters-settings.govet]
 check-shadowing = true

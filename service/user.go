@@ -7,15 +7,23 @@ import (
 )
 
 type UserService interface {
+	// Warn: 注销用户
 	DeleteByUUID(uuid string)
+
+	// New: 注册新用户
 	NewUser(user dbmodel.UserDBModel) dbmodel.UserDBModel
+
+	// Updates: 更新用户信息
 	UpdateUser(user dbmodel.UserDBModel)
 	UpdatePassword(uuid string, password string)
 	UploadAvatar(uuid string, avatar string)
-	IsExistByName(name string) bool
+
+	// Checks
 	IsExistByUUID(uuid string) bool
-	IsExistByPhone(phone string) bool
-	IsExistByEmail(email string) bool
+	CheckEmail(email string) bool
+	CheckPhone(phone string) bool
+
+	// Get: 获取用户信息
 	GetUserByName(name string) dbmodel.UserDBModel
 	GetUserByUUID(uuid string) dbmodel.UserDBModel
 	GetUserByPhone(phone string) dbmodel.UserDBModel
@@ -58,31 +66,10 @@ func (u *userService) UploadAvatar(uuid string, avatar string) {
 	u.db.Model(&dbmodel.UserDBModel{}).Where("uuid = ?", uuid).Update("avatar", avatar)
 }
 
-// IsExistByName 通过用户名判断用户是否存在
-func (u *userService) IsExistByName(name string) bool {
-	var count int64
-	u.db.Model(&dbmodel.UserDBModel{}).Where("username = ?", name).Count(&count)
-	return count != 0
-}
-
 // IsExistByUUID 通过用户UUID判断用户是否存在
 func (u *userService) IsExistByUUID(uuid string) bool {
 	var count int64
 	u.db.Model(&dbmodel.UserDBModel{}).Where("uuid = ?", uuid).Count(&count)
-	return count != 0
-}
-
-// IsExistByPhone 通过用户手机号判断用户是否存在
-func (u *userService) IsExistByPhone(phone string) bool {
-	var count int64
-	u.db.Model(&dbmodel.UserDBModel{}).Where("phone = ?", phone).Count(&count)
-	return count != 0
-}
-
-// IsExistByEmail 通过用户邮箱判断用户是否存在
-func (u *userService) IsExistByEmail(email string) bool {
-	var count int64
-	u.db.Model(&dbmodel.UserDBModel{}).Where("email = ?", email).Count(&count)
 	return count != 0
 }
 
@@ -112,4 +99,18 @@ func (u *userService) GetUserByEmail(email string) dbmodel.UserDBModel {
 	user := dbmodel.UserDBModel{}
 	u.db.Omit("password").Where("email = ?", email).First(&user)
 	return user
+}
+
+// CheckEmail 检查邮箱是否可用
+func (u *userService) CheckEmail(email string) bool {
+	var count int64
+	u.db.Model(&dbmodel.UserDBModel{}).Where("email = ?", email).Count(&count)
+	return count == 0
+}
+
+// CheckPhone 检查手机号是否可用
+func (u *userService) CheckPhone(phone string) bool {
+	var count int64
+	u.db.Model(&dbmodel.UserDBModel{}).Where("phone = ?", phone).Count(&count)
+	return count == 0
 }

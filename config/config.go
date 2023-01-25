@@ -22,20 +22,17 @@ func NewConfig(path string) (*Config, error) {
 		Redis:  &Redis{},
 		SMS:    &SMS{},
 	}
-	if !file.IsExist(path) {
-		file, err := os.Create(path)
-		if err != nil {
-			return nil, err
-		}
-		defer file.Close()
-
-		encoder := yaml.NewEncoder(file)
-		err = encoder.Encode(config)
-		if err != nil {
-			return nil, err
-		}
+	file, err := os.Create(path)
+	if err != nil {
+		return nil, err
 	}
-	config = LoadConfig()
+	defer file.Close()
+	encoder := yaml.NewEncoder(file)
+	encoder.SetIndent(2)
+	err = encoder.Encode(config)
+	if err != nil {
+		return nil, err
+	}
 	return config, nil
 }
 
@@ -52,4 +49,19 @@ func LoadConfig() *Config {
 		return nil
 	}
 	return config
+}
+
+func InitConfig(path string) *Config {
+	// 判断配置文件是否存在
+	if !file.IsExist(path) {
+		// 不存在则创建
+		config, err := NewConfig(path)
+		if err != nil {
+			panic(err)
+		}
+		return config
+	} else {
+		// 存在则加载
+		return LoadConfig()
+	}
 }

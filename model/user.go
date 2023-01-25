@@ -1,5 +1,10 @@
 package model
 
+type Username map[string]string
+type Password map[string]string
+type Email map[string]string
+type Phone map[string]string
+
 type UserNameRegister struct {
 	UserName string `json:"username"`
 	Password string `json:"password"`
