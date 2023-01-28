@@ -17,9 +17,6 @@ tmp
 .idea
 .fleet
 
-# jwt secret
-common/jwt_secret.go
-
 # Added by cargo
 
 /target
