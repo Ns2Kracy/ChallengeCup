@@ -25,3 +25,7 @@ common/jwt_secret.go
 /target
 
 ./docs
+
+*.out
+
+ChallengeCup

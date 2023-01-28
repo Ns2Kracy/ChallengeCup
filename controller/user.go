@@ -144,7 +144,8 @@ func PostUserRegisterByEmail(ctx iris.Context) {
 		log.Infof("Email %s register failed, error: %s", userRequest.Email, err)
 		return
 	}
-	if !verify.VerifyEmail(userRequest.Email) {
+
+	if verify.VerifyEmail(userRequest.Email) {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.INVALID_PARAMS),
@@ -209,20 +210,18 @@ func PostUserRegisterByEmail(ctx iris.Context) {
 func GetPhoneCode(ctx iris.Context) {
 	phone := ctx.FormValue("phone")
 
-	if !verify.VerifyPhone(phone) {
+	if verify.VerifyPhone(phone) {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.INVALID_PARAMS),
 		})
-		log.Errorf("Phone %s get code failed, invalid phone number", phone)
 		return
 	}
 
 	ValidateCode := verify.RandomCode()
+	dao.RedisClient.Set(ctx, "phone_code_"+phone, ValidateCode, time.Minute*5)
 
 	go func() {
-		dao.RedisClient.Set(ctx, "phone_code_"+phone, ValidateCode, time.Minute*5)
-		log.Infof("caching phone code %s to redis", ValidateCode)
 		err := verify.PhoneSendCode(phone, ValidateCode)
 		if err != nil {
 			ctx.JSON(model.Result{
@@ -245,7 +244,7 @@ func GetPhoneCode(ctx iris.Context) {
 func GetEmailCode(ctx iris.Context) {
 	email := ctx.FormValue("email")
 
-	if !verify.VerifyEmail(email) {
+	if verify.VerifyEmail(email) {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.INVALID_PARAMS),
@@ -255,11 +254,12 @@ func GetEmailCode(ctx iris.Context) {
 	}
 
 	ValidateCode := verify.RandomCode()
+	ValidateTime := time.Minute * 30
+	ValidBefore := time.Now().Add(ValidateTime).Format("2006-01-02 15:04:05")
 
 	go func() {
-		dao.RedisClient.Set(ctx, "email_code_"+email, ValidateCode, time.Minute*5)
-		log.Infof("caching phone code %s to redis", ValidateCode)
-		err := verify.MailSendCode(email, ValidateCode)
+		dao.RedisClient.Set(ctx, "email_code_"+email, ValidateCode, ValidateTime)
+		err := verify.MailSendCode(ctx, email, ValidateCode, ValidBefore)
 		if err != nil {
 			ctx.JSON(model.Result{
 				Code:    common.CLIENT_ERROR,

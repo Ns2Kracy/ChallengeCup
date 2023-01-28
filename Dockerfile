@@ -1,18 +1,13 @@
-FROM golang:alpine
+FROM golang:latest
 
-ENV GOPROXY https://goproxy.cn,direct \
-    GO111MODULE on \
-    
+ENV GOPROXY https://goproxy.cn
+
 WORKDIR /build
 
-COPY . .
+COPY . /build
 
-RUN go build -o main .
+RUN go build -o main
 
-WORKDIR /dist
+EXPOSE 8848
 
-RUN cp /build/main .
-
-EXPOSE 8080
-
-CMD ["./dist/main"]
+ENTRYPOINT [ "/build/main" ]
