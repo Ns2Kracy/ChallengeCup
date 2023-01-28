@@ -9,18 +9,19 @@ import (
 )
 
 type Config struct {
-	System *System `yaml:"system"`
-	Mysql  *Mysql  `yaml:"mysql"`
-	Redis  *Redis  `yaml:"redis"`
-	SMS    *SMS    `yaml:"sms"`
+	System System `yaml:"system"`
+	Mysql  Mysql  `yaml:"mysql"`
+	Redis  Redis  `yaml:"redis"`
+	SMS    SMS    `yaml:"sms"`
+	Mail   Mail   `yaml:"mail"`
 }
 
 func NewConfig(path string) (*Config, error) {
 	config := &Config{
-		System: &System{},
-		Mysql:  &Mysql{},
-		Redis:  &Redis{},
-		SMS:    &SMS{},
+		System: System{},
+		Mysql:  Mysql{},
+		Redis:  Redis{},
+		SMS:    SMS{},
 	}
 	file, err := os.Create(path)
 	if err != nil {
