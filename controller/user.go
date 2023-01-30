@@ -11,21 +11,20 @@ import (
 	"ChallengeCup/service"
 	"ChallengeCup/service/dbmodel"
 	"ChallengeCup/utils/encrypt"
-	log "ChallengeCup/utils/logger"
 	"ChallengeCup/utils/uuid"
 	"ChallengeCup/utils/verify"
 
 	"github.com/kataras/iris/v12"
 )
 
-func PostUserRegisterByUserName(ctx iris.Context) {
-	userRequest := &model.UserNameRegister{}
+// PostUserLoginByUsername 用户名密码注册
+func PostUserRegisterByUsername(ctx iris.Context) {
+	userRequest := &model.UsernameRegister{}
 	if err := ctx.ReadJSON(userRequest); err != nil {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.INVALID_PARAMS),
 		})
-		log.Errorf("User %s register failed, error: %s", userRequest.UserName, err)
 		return
 	}
 
@@ -34,14 +33,12 @@ func PostUserRegisterByUserName(ctx iris.Context) {
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.INVALID_PARAMS),
 		})
-		log.Errorf("User %s register failed, the username or password is empty", userRequest.UserName)
 		return
 	} else if len(userRequest.UserName) < 6 || len(userRequest.Password) < 8 {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.SIMPLE_PASSWORD),
 		})
-		log.Errorf("User %s register failed, the username or password is too simple", userRequest.UserName)
 		return
 	}
 
@@ -59,6 +56,7 @@ func PostUserRegisterByUserName(ctx iris.Context) {
 	})
 }
 
+// PostUserLoginByUsername 手机号密码注册
 func PostUserRegisterByPhone(ctx iris.Context) {
 	userRequest := &model.PhoneRegister{}
 
@@ -67,25 +65,22 @@ func PostUserRegisterByPhone(ctx iris.Context) {
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.INVALID_PARAMS),
 		})
-		log.Errorf("register failed, invalid params")
 		return
 	}
 
-	if !verify.VerifyPhone(userRequest.Phone) {
+	if verify.VerifyPhone(userRequest.Phone) {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.INVALID_PARAMS),
 		})
-		log.Errorf("register failed, invalid phone number")
 		return
 	}
 
-	if userRequest.Code != dao.RedisClient.Get(ctx, "phone_code_"+userRequest.Phone).String() {
+	if userRequest.Code != dao.RedisClient.Get(ctx, "phone_code_"+userRequest.Phone).Val() {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.CLIENT_ERROR),
 		})
-		log.Errorf("register failed, invalid phone code")
 		return
 	}
 
@@ -94,38 +89,36 @@ func PostUserRegisterByPhone(ctx iris.Context) {
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.INVALID_PARAMS),
 		})
-		log.Infof("register failed, the password is empty")
 		return
 	} else if len(userRequest.Password) < 6 {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.SIMPLE_PASSWORD),
 		})
-		log.Infof("register failed, the password is too simple")
 		return
 	}
 
 	checkUserExist := service.Service.UserService.CheckPhone(userRequest.Phone)
 
-	if checkUserExist {
+	if !checkUserExist {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.USER_EXIST),
 		})
-		log.Errorf("Phone %s register failed, this phone has been registered", userRequest.Phone)
 		return
 	}
 
 	newUser := dbmodel.UserDBModel{
-		UUID:     uuid.GenerateUUID(),
-		UserName: userRequest.Phone,
-		Password: encrypt.EncryptPassword(userRequest.Password),
-		Phone:    userRequest.Phone,
+		UUID:           uuid.GenerateUUID(),
+		UserName:       userRequest.Phone,
+		Password:       encrypt.EncryptPassword(userRequest.Password),
+		Phone:          userRequest.Phone,
+		IsPhoneActived: true,
 	}
 
-	newUser = service.Service.UserService.NewUser(newUser)
+	dao.RedisClient.Del(ctx, "phone_code_"+userRequest.Phone)
 
-	log.Infof("Phone %s register success", newUser.Phone)
+	newUser = service.Service.UserService.NewUser(newUser)
 
 	ctx.JSON(model.Result{
 		Code:    common.SUCCESS,
@@ -133,6 +126,7 @@ func PostUserRegisterByPhone(ctx iris.Context) {
 	})
 }
 
+// PostUserLoginByEmail 邮箱密码注册
 func PostUserRegisterByEmail(ctx iris.Context) {
 	userRequest := &model.EmailRegister{}
 
@@ -141,7 +135,6 @@ func PostUserRegisterByEmail(ctx iris.Context) {
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.INVALID_PARAMS),
 		})
-		log.Infof("Email %s register failed, error: %s", userRequest.Email, err)
 		return
 	}
 
@@ -150,7 +143,6 @@ func PostUserRegisterByEmail(ctx iris.Context) {
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.INVALID_PARAMS),
 		})
-		log.Infof("Email %s register failed, invalid email address", userRequest.Email)
 		return
 	}
 
@@ -159,7 +151,6 @@ func PostUserRegisterByEmail(ctx iris.Context) {
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.CLIENT_ERROR),
 		})
-		log.Infof("Email %s register failed, invalid email code", userRequest.Email)
 		return
 	}
 
@@ -168,14 +159,12 @@ func PostUserRegisterByEmail(ctx iris.Context) {
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.INVALID_PARAMS),
 		})
-		log.Infof("Email %s register failed, the password is empty", userRequest.Email)
 		return
 	} else if len(userRequest.Password) < 6 {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.SIMPLE_PASSWORD),
 		})
-		log.Infof("Email %s register failed, the password is too simple", userRequest.Email)
 		return
 	}
 
@@ -186,7 +175,6 @@ func PostUserRegisterByEmail(ctx iris.Context) {
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.USER_EXIST),
 		})
-		log.Infof("Email %s register failed, the email has been registered", userRequest.Email)
 		return
 	}
 
@@ -199,18 +187,25 @@ func PostUserRegisterByEmail(ctx iris.Context) {
 
 	newUser = service.Service.UserService.NewUser(newUser)
 
-	log.Infof("Email %s register success", newUser.UserName)
-
 	ctx.JSON(model.Result{
 		Code:    common.SUCCESS,
 		Message: common.Message(common.SUCCESS),
 	})
 }
 
+// GetPhoneCode 获取手机验证码
 func GetPhoneCode(ctx iris.Context) {
-	phone := ctx.FormValue("phone")
+	phone := model.Phone{}
 
-	if verify.VerifyPhone(phone) {
+	if err := ctx.ReadJSON(&phone); err != nil {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.INVALID_PARAMS),
+		})
+		return
+	}
+
+	if verify.VerifyPhone(phone["phone"]) {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.INVALID_PARAMS),
@@ -219,20 +214,17 @@ func GetPhoneCode(ctx iris.Context) {
 	}
 
 	ValidateCode := verify.RandomCode()
-	dao.RedisClient.Set(ctx, "phone_code_"+phone, ValidateCode, time.Minute*5)
+	dao.RedisClient.Set(ctx, "PhoneCode_"+phone["phone"], ValidateCode, time.Minute*5)
 
 	go func() {
-		err := verify.PhoneSendCode(phone, ValidateCode)
+		err := verify.PhoneSendCode(phone["phone"], ValidateCode)
 		if err != nil {
 			ctx.JSON(model.Result{
 				Code:    common.CLIENT_ERROR,
 				Message: common.Message(common.CLIENT_ERROR),
 			})
-			log.Errorf("sending verification code to phone %s failed, error: %s", phone, err)
 		}
 	}()
-
-	log.Infof("sending verification code to phone %s success", phone)
 
 	ctx.JSON(model.Result{
 		Code:    common.SUCCESS,
@@ -241,15 +233,15 @@ func GetPhoneCode(ctx iris.Context) {
 	})
 }
 
+// GetEmailCode 获取邮箱验证码
 func GetEmailCode(ctx iris.Context) {
-	email := ctx.FormValue("email")
+	email := model.Email{}
 
-	if verify.VerifyEmail(email) {
+	if verify.VerifyEmail(email["email"]) {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.INVALID_PARAMS),
 		})
-		log.Errorf("invalid email address")
 		return
 	}
 
@@ -258,43 +250,33 @@ func GetEmailCode(ctx iris.Context) {
 	ValidBefore := time.Now().Add(ValidateTime).Format("2006-01-02 15:04:05")
 
 	go func() {
-		dao.RedisClient.Set(ctx, "email_code_"+email, ValidateCode, ValidateTime)
-		err := verify.MailSendCode(ctx, email, ValidateCode, ValidBefore)
+		dao.RedisClient.Set(ctx, "EmailCode_"+email["email"], ValidateCode, ValidateTime)
+		err := verify.MailSendCode(ctx, email["email"], ValidateCode, ValidBefore)
 		if err != nil {
 			ctx.JSON(model.Result{
 				Code:    common.CLIENT_ERROR,
 				Message: common.Message(common.CLIENT_ERROR),
 			})
-			log.Errorf("sending verification code to email %s failed, error: %s", email, err)
 		}
 	}()
-
-	log.Infof("sending verification code to email %s success", email)
 
 	ctx.JSON(model.Result{
 		Code:    common.SUCCESS,
 		Message: common.Message(common.SUCCESS),
 		Data:    ValidateCode,
 	})
+	// TODO
 }
 
-func PostActivatePhone(ctx iris.Context) {
-	// TODO: activate phone
-}
-
-func PostActivateEmail(ctx iris.Context) {
-	// TODO: activate email
-}
-
+// PostUserLogin 用户名密码登录
 func PostUserLogin(ctx iris.Context) {
-	userRequest := model.UserNameRegister{}
+	userRequest := model.UsernameRegister{}
 
 	if err := ctx.ReadJSON(&userRequest); err != nil {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.INVALID_PARAMS),
 		})
-		log.Errorf("login failed, invalid params")
 		return
 	}
 
@@ -303,7 +285,6 @@ func PostUserLogin(ctx iris.Context) {
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.INVALID_PARAMS),
 		})
-		log.Errorf("login failed, username or password is empty")
 		return
 	}
 
@@ -313,7 +294,6 @@ func PostUserLogin(ctx iris.Context) {
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.USER_NOT_EXIST),
 		})
-		log.Errorf("user %s login failed, user not exist", userRequest.UserName)
 		return
 	}
 
@@ -322,7 +302,6 @@ func PostUserLogin(ctx iris.Context) {
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.ERROR_PASSWORD),
 		})
-		log.Errorf("user %s login failed, password is wrong", userRequest.UserName)
 		return
 	}
 
@@ -332,7 +311,6 @@ func PostUserLogin(ctx iris.Context) {
 		ExpiresIn:   time.Now().Add(expireTime).Unix(),
 	}
 	dao.RedisClient.Set(ctx, "AccessToken_"+strconv.Itoa(int(user.UUID)), token.AccessToken, expireTime)
-	log.Infof("user %s login success, caching access token to redis", user.UserName)
 
 	ctx.JSON(model.Result{
 		Code:    common.SUCCESS,
@@ -341,14 +319,217 @@ func PostUserLogin(ctx iris.Context) {
 	})
 }
 
-func PostUserLoginByPhone(ctx iris.Context) {
-	// TODO: phone login
+// PostUserLoginByPhonePassword 手机号密码登录
+func PostUserLoginByPhonePassword(ctx iris.Context) {
+	userRequest := model.PhonePasswordParams{}
+
+	if err := ctx.ReadJSON(&userRequest); err != nil {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.INVALID_PARAMS),
+		})
+		return
+	}
+
+	if len(userRequest.Phone) == 0 || len(userRequest.Password) == 0 {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.INVALID_PARAMS),
+		})
+		return
+	}
+
+	user := service.Service.UserService.GetUserByPhone(userRequest.Phone)
+
+	if user.ID == 0 {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.USER_NOT_EXIST),
+		})
+		return
+	}
+
+	if !encrypt.ComparePassword(userRequest.Password, user.Password) {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.ERROR_PASSWORD),
+		})
+		return
+	}
+
+	expireTime := 24 * time.Hour * time.Duration(1)
+	token := model.ValidateToken{
+		AccessToken: middleware.GetAccessToken(user.UserName, user.Password, user.ID),
+		ExpiresIn:   time.Now().Add(expireTime).Unix(),
+	}
+	dao.RedisClient.Set(ctx, "AccessToken_"+strconv.Itoa(int(user.UUID)), token.AccessToken, expireTime)
+
+	ctx.JSON(model.Result{
+		Code:    common.SUCCESS,
+		Message: common.Message(common.SUCCESS),
+		Data:    token,
+	})
 }
 
-func PostUserLoginByEmail(ctx iris.Context) {
-	// TODO: email login
+// PostUserLoginByPhoneCode 手机号验证码登录
+func PostUserLoginByPhoneCode(ctx iris.Context) {
+	userRequest := model.PhoneCodeParams{}
+
+	if err := ctx.ReadJSON(&userRequest); err != nil {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.INVALID_PARAMS),
+		})
+		return
+	}
+
+	if len(userRequest.Phone) == 0 || len(userRequest.Code) == 0 {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.INVALID_PARAMS),
+		})
+		return
+	}
+
+	user := service.Service.UserService.GetUserByPhone(userRequest.Phone)
+
+	if user.ID == 0 {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.USER_NOT_EXIST),
+		})
+		return
+	}
+
+	if userRequest.Code != dao.RedisClient.Get(ctx, "PhoneCode_"+userRequest.Phone).Val() {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.INVALID_PARAMS),
+		})
+		return
+	}
+
+	expireTime := 24 * time.Hour * time.Duration(1)
+	token := model.ValidateToken{
+		AccessToken: middleware.GetAccessToken(user.UserName, user.Password, user.ID),
+		ExpiresIn:   time.Now().Add(expireTime).Unix(),
+	}
+	dao.RedisClient.Set(ctx, "AccessToken_"+strconv.Itoa(int(user.UUID)), token.AccessToken, expireTime)
+
+	ctx.JSON(model.Result{
+		Code:    common.SUCCESS,
+		Message: common.Message(common.SUCCESS),
+		Data:    token,
+	})
 }
 
+// PostUserLoginByEmailPassword 邮箱密码登录
+func PostUserLoginByEmailPassword(ctx iris.Context) {
+	userRequest := model.EmailPasswordParams{}
+
+	if err := ctx.ReadJSON(&userRequest); err != nil {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.INVALID_PARAMS),
+		})
+		return
+	}
+
+	if len(userRequest.Email) == 0 || len(userRequest.Password) == 0 {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.INVALID_PARAMS),
+		})
+		return
+	}
+
+	user := service.Service.UserService.GetUserByEmail(userRequest.Email)
+
+	if user.ID == 0 {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.USER_NOT_EXIST),
+		})
+		return
+	}
+
+	if !encrypt.ComparePassword(userRequest.Password, user.Password) {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.ERROR_PASSWORD),
+		})
+		return
+	}
+
+	expireTime := 24 * time.Hour * time.Duration(1)
+	token := model.ValidateToken{
+		AccessToken: middleware.GetAccessToken(user.UserName, user.Password, user.ID),
+		ExpiresIn:   time.Now().Add(expireTime).Unix(),
+	}
+	dao.RedisClient.Set(ctx, "AccessToken_"+strconv.Itoa(int(user.UUID)), token.AccessToken, expireTime)
+
+	ctx.JSON(model.Result{
+		Code:    common.SUCCESS,
+		Message: common.Message(common.SUCCESS),
+		Data:    token,
+	})
+	// TODO
+}
+
+// PostUserLoginByEmailCode 邮箱验证码登录
+func PostUserLoginByEmailCode(ctx iris.Context) {
+	userRequest := model.EmailCodeParams{}
+
+	if err := ctx.ReadJSON(&userRequest); err != nil {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.INVALID_PARAMS),
+		})
+		return
+	}
+
+	if len(userRequest.Email) == 0 || len(userRequest.Code) == 0 {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.INVALID_PARAMS),
+		})
+		return
+	}
+
+	user := service.Service.UserService.GetUserByEmail(userRequest.Email)
+
+	if user.ID == 0 {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.USER_NOT_EXIST),
+		})
+		return
+	}
+
+	if userRequest.Code != dao.RedisClient.Get(ctx, "EmailCode_"+userRequest.Email).Val() {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.INVALID_PARAMS),
+		})
+		return
+	}
+
+	expireTime := 24 * time.Hour * time.Duration(1)
+	token := model.ValidateToken{
+		AccessToken: middleware.GetAccessToken(user.UserName, user.Password, user.ID),
+		ExpiresIn:   time.Now().Add(expireTime).Unix(),
+	}
+	dao.RedisClient.Set(ctx, "AccessToken_"+strconv.Itoa(int(user.UUID)), token.AccessToken, expireTime)
+
+	ctx.JSON(model.Result{
+		Code:    common.SUCCESS,
+		Message: common.Message(common.SUCCESS),
+		Data:    token,
+	})
+	// TODO
+}
+
+// PostUserLogout 用户登出
 func PostUserLogout(ctx iris.Context) {
 	uuid := ctx.GetHeader("uuid")
 
@@ -360,10 +541,19 @@ func PostUserLogout(ctx iris.Context) {
 	})
 }
 
+// GetUserInfo 获取用户信息
 func GetUserInfo(ctx iris.Context) {
 	uuid := ctx.GetHeader("uuid")
 
 	user := service.Service.UserService.GetUserByUUID(uuid)
+
+	if user.ID == 0 {
+		ctx.JSON(model.Result{
+			Code:    common.CLIENT_ERROR,
+			Message: common.Message(common.USER_NOT_EXIST),
+		})
+		return
+	}
 
 	ctx.JSON(model.Result{
 		Code:    common.SUCCESS,
@@ -372,6 +562,7 @@ func GetUserInfo(ctx iris.Context) {
 	})
 }
 
+// PutUserInfo 更新用户信息
 func PutUserInfo(ctx iris.Context) {
 	uuid := ctx.GetHeader("uuid")
 
@@ -398,8 +589,10 @@ func PutUserInfo(ctx iris.Context) {
 		Code:    common.SUCCESS,
 		Message: common.Message(common.SUCCESS),
 	})
+	// TODO
 }
 
+// PutUserAvatar 更新用户头像
 func PutUserAvatar(ctx iris.Context) {
 	uuid := ctx.GetHeader("uuid")
 
@@ -427,9 +620,11 @@ func PutUserAvatar(ctx iris.Context) {
 		Code:    common.SUCCESS,
 		Message: common.Message(common.SUCCESS),
 	})
+	// TODO
 }
 
-func PutUserName(ctx iris.Context) {
+// PutUserPassword 更新用户名
+func PutUsername(ctx iris.Context) {
 	uuid := ctx.GetHeader("uuid")
 
 	var username model.Username
@@ -466,6 +661,7 @@ func PutUserName(ctx iris.Context) {
 	})
 }
 
+// PutUserPassword 更新密码
 func PutUserPassword(ctx iris.Context) {
 	uuid := ctx.GetHeader("uuid")
 
@@ -503,10 +699,11 @@ func PutUserPassword(ctx iris.Context) {
 	})
 }
 
+// PutUserEmail 更新邮箱
 func PutUserEmail(ctx iris.Context) {
 	uuid := ctx.GetHeader("uuid")
 
-	var email model.Email
+	email := model.EmailCodeParams{}
 	if err := ctx.ReadJSON(&email); err != nil {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
@@ -515,7 +712,7 @@ func PutUserEmail(ctx iris.Context) {
 		return
 	}
 
-	if len(email) == 0 {
+	if verify.VerifyEmail(email.Email) == false {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.INVALID_PARAMS),
@@ -532,7 +729,7 @@ func PutUserEmail(ctx iris.Context) {
 		return
 	}
 
-	if service.Service.UserService.CheckEmail(email["email"]) {
+	if service.Service.UserService.CheckEmail(email.Email) {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.EMAIL_EXIST),
@@ -540,7 +737,7 @@ func PutUserEmail(ctx iris.Context) {
 		return
 	}
 
-	if dao.RedisClient.Get(ctx, email["email"]+"code").Val() != email["code"] {
+	if email.Code != dao.RedisClient.Get(ctx, "EmailCode_"+email.Email).Val() {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.CODE_VALIDATION_ERROR),
@@ -548,7 +745,9 @@ func PutUserEmail(ctx iris.Context) {
 		return
 	}
 
-	user.Email = email["email"]
+	user.Email = email.Email
+	user.IsEmailActived = true
+	user.EmailActivedAt = time.Now().Unix()
 	service.Service.UserService.UpdateUser(user)
 
 	ctx.JSON(model.Result{
@@ -557,10 +756,11 @@ func PutUserEmail(ctx iris.Context) {
 	})
 }
 
+// PutUserPhone 更新手机号
 func PutUserPhone(ctx iris.Context) {
 	uuid := ctx.GetHeader("uuid")
 
-	var phone model.Phone
+	phone := model.PhoneCodeParams{}
 
 	if err := ctx.ReadJSON(&phone); err != nil {
 		ctx.JSON(model.Result{
@@ -570,7 +770,7 @@ func PutUserPhone(ctx iris.Context) {
 		return
 	}
 
-	if len(phone) == 0 {
+	if len(phone.Phone) == 0 {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.INVALID_PARAMS),
@@ -587,7 +787,7 @@ func PutUserPhone(ctx iris.Context) {
 		return
 	}
 
-	if service.Service.UserService.CheckPhone(phone["phone"]) {
+	if service.Service.UserService.CheckPhone(phone.Phone) {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.PHONE_EXIST),
@@ -595,7 +795,7 @@ func PutUserPhone(ctx iris.Context) {
 		return
 	}
 
-	if dao.RedisClient.Get(ctx, phone["phone"]+"code").Val() != phone["code"] {
+	if phone.Code != dao.RedisClient.Get(ctx, "PhoneCode_"+phone.Phone).Val() {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.CODE_VALIDATION_ERROR),
@@ -603,7 +803,9 @@ func PutUserPhone(ctx iris.Context) {
 		return
 	}
 
-	user.Phone = phone["phone"]
+	user.Phone = phone.Phone
+	user.IsPhoneActived = true
+	user.PhoneActivedAt = time.Now().Unix()
 	service.Service.UserService.UpdateUser(user)
 
 	ctx.JSON(model.Result{
