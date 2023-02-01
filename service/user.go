@@ -20,14 +20,12 @@ type UserService interface {
 
 	// Checks
 	IsExistByUUID(uuid string) bool
-	CheckEmail(email string) bool
 	CheckPhone(phone string) bool
 
 	// Get: 获取用户信息
 	GetUserByName(name string) dbmodel.UserDBModel
 	GetUserByUUID(uuid string) dbmodel.UserDBModel
 	GetUserByPhone(phone string) dbmodel.UserDBModel
-	GetUserByEmail(email string) dbmodel.UserDBModel
 }
 
 type userService struct {
@@ -92,20 +90,6 @@ func (u *userService) GetUserByPhone(phone string) dbmodel.UserDBModel {
 	user := dbmodel.UserDBModel{}
 	u.db.Omit("password").Where("phone = ?", phone).First(&user)
 	return user
-}
-
-// GetUserByEmail 通过用户邮箱获取用户信息
-func (u *userService) GetUserByEmail(email string) dbmodel.UserDBModel {
-	user := dbmodel.UserDBModel{}
-	u.db.Omit("password").Where("email = ?", email).First(&user)
-	return user
-}
-
-// CheckEmail 检查邮箱是否可用
-func (u *userService) CheckEmail(email string) bool {
-	var count int64
-	u.db.Model(&dbmodel.UserDBModel{}).Where("email = ?", email).Count(&count)
-	return count == 0
 }
 
 // CheckPhone 检查手机号是否可用

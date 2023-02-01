@@ -13,7 +13,6 @@ type Config struct {
 	Mysql  Mysql  `yaml:"mysql"`
 	Redis  Redis  `yaml:"redis"`
 	SMS    SMS    `yaml:"sms"`
-	Mail   Mail   `yaml:"mail"`
 	Mqtt   Mqtt   `yaml:"mqtt"`
 }
 
@@ -55,6 +54,6 @@ func InitConfig(path string) *Config {
 			panic(err)
 		}
 		return config
-	} 
+	}
 	return LoadConfig()
 }

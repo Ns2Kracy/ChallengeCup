@@ -12,6 +12,8 @@ import (
 	"github.com/kataras/iris/v12"
 )
 
+var Secret = []byte("challenge_cup_backend")
+
 type Claims struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
@@ -28,7 +30,7 @@ var (
 		ErrorHandler:        errorHandler,
 	}).Serve
 	validationKeyGetterFuc = func(token *jwt.Token) (interface{}, error) {
-		return common.Secret, nil
+		return Secret, nil
 	}
 	extractor = func(ctx iris.Context) (string, error) {
 		auth := ctx.GetHeader("Authorization")
@@ -60,7 +62,7 @@ func GenerateToken(username string, password string, id int, issuer string, t ti
 		},
 	}
 	token := iris_jwt.NewTokenWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(common.Secret)
+	tokenString, err := token.SignedString(Secret)
 	if err != nil {
 		return "", err
 	}

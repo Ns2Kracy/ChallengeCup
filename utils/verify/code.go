@@ -1,20 +1,15 @@
 package verify
 
 import (
-	"bytes"
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
-	"html/template"
-	"path"
 
 	"ChallengeCup/config"
 	log "ChallengeCup/utils/logger"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
-	"github.com/kataras/iris/v12"
-	"gopkg.in/gomail.v2"
 )
 
 func RandomCode() string {
@@ -65,40 +60,6 @@ func PhoneSendCode(phone string, code string) error {
 	}
 
 	log.Infof("sms send success: ", response.GetHttpContentString())
-
-	return nil
-}
-
-func MailSendCode(ctx iris.Context, email string, code string, timer string) error {
-	conf := config.LoadConfig().Mail
-	templateFile := "../../resources/template/SendMailCode.liquid"
-
-	binds := map[string]interface{}{
-		"code":  code,
-		"timer": timer,
-	}
-
-	template, _ := template.New(path.Base(templateFile)).Funcs(template.FuncMap{
-		"RouteName2URL": ctx.GetCurrentRoute().Path,
-	}).ParseFiles(templateFile)
-
-	var tpl bytes.Buffer
-	if err := template.Execute(&tpl, binds); err != nil {
-		log.Error(err)
-		return err
-	}
-
-	message := gomail.NewMessage()
-	message.SetHeader("From", conf.From)
-	message.SetHeader("To", email)
-	message.SetHeader("Subject", "验证码")
-	message.SetBody("text/html", tpl.String())
-	if err := gomail.NewDialer(conf.Host, conf.Port, conf.Username, conf.Password).DialAndSend(message); err != nil {
-		log.Error(err)
-		return err
-	}
-
-	log.Infof("send code to %s success", email)
 
 	return nil
 }
