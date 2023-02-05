@@ -6,8 +6,11 @@ import (
 	"time"
 
 	"ChallengeCup/config"
+	"ChallengeCup/dao"
 	"ChallengeCup/router"
 	"ChallengeCup/utils/file"
+
+	"ChallengeCup/utils/mqtt"
 
 	"github.com/kataras/iris/v12"
 )
@@ -20,6 +23,9 @@ func main() {
 	logFile := NewLogFile()
 	app.Logger().AddOutput(logFile)
 	defer logFile.Close()
+
+	mqtt.RunMqttClient()
+	dao.NewRedis()
 
 	listener, err := net.Listen("tcp", conf.System.Host+":"+conf.System.Port)
 	if err != nil {

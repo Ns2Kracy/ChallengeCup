@@ -11,6 +11,7 @@ import (
 	"ChallengeCup/service"
 	"ChallengeCup/service/dbmodel"
 	"ChallengeCup/utils/encrypt"
+	log "ChallengeCup/utils/logger"
 	"ChallengeCup/utils/uuid"
 	"ChallengeCup/utils/verify"
 
@@ -127,10 +128,15 @@ func PostUserLoginAndRegister(ctx iris.Context) {
 	}
 	dao.RedisClient.Set(ctx, "AccessToken_"+strconv.Itoa(int(newUser.UUID)), token.AccessToken, expireTime)
 
+	data := map[string]interface{}{
+		"token": token,
+		"uuid":  newUser.UUID,
+	}
+
 	ctx.JSON(model.Result{
 		Code:    common.SUCCESS,
 		Message: common.Message(common.SUCCESS),
-		Data:    token,
+		Data:    data,
 	})
 }
 
@@ -330,7 +336,7 @@ func PostUserLoginByPhonePassword(ctx iris.Context) {
 		return
 	}
 
-	if len(userRequest.Phone) == 0 || len(userRequest.Password) == 0 {
+	if len(userRequest.Phone) != 11 || len(userRequest.Password) == 0 {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.INVALID_PARAMS),
@@ -339,7 +345,6 @@ func PostUserLoginByPhonePassword(ctx iris.Context) {
 	}
 
 	user := service.Service.UserService.GetUserByPhone(userRequest.Phone)
-
 	if user.ID == 0 {
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
@@ -348,7 +353,11 @@ func PostUserLoginByPhonePassword(ctx iris.Context) {
 		return
 	}
 
-	if !encrypt.ComparePassword(userRequest.Password, user.Password) {
+	log.Infof(user.Password)
+	log.Infof(userRequest.Password)
+
+	if !encrypt.ComparePassword(user.Password, userRequest.Password) {
+		log.Infof("password is wrong")
 		ctx.JSON(model.Result{
 			Code:    common.CLIENT_ERROR,
 			Message: common.Message(common.ERROR_PASSWORD),
@@ -363,10 +372,15 @@ func PostUserLoginByPhonePassword(ctx iris.Context) {
 	}
 	dao.RedisClient.Set(ctx, "AccessToken_"+strconv.Itoa(int(user.UUID)), token.AccessToken, expireTime)
 
+	data := map[string]interface{}{
+		"token": token,
+		"uuid":  user.UUID,
+	}
+
 	ctx.JSON(model.Result{
 		Code:    common.SUCCESS,
 		Message: common.Message(common.SUCCESS),
-		Data:    token,
+		Data:    data,
 	})
 }
 
@@ -415,10 +429,15 @@ func PostUserLoginByPhoneCode(ctx iris.Context) {
 	}
 	dao.RedisClient.Set(ctx, "AccessToken_"+strconv.Itoa(int(user.UUID)), token.AccessToken, expireTime)
 
+	data := map[string]interface{}{
+		"token": token,
+		"uuid":  user.UUID,
+	}
+
 	ctx.JSON(model.Result{
 		Code:    common.SUCCESS,
 		Message: common.Message(common.SUCCESS),
-		Data:    token,
+		Data:    data,
 	})
 }
 

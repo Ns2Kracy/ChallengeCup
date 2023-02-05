@@ -81,14 +81,14 @@ func (u *userService) GetUserByName(name string) dbmodel.UserDBModel {
 // GetUserByUUID 通过用户UUID获取用户信息
 func (u *userService) GetUserByUUID(uid string) dbmodel.UserDBModel {
 	user := dbmodel.UserDBModel{}
-	u.db.Where("uuid = ?", uid).First(&user)
+	u.db.Omit("password").Where("uuid = ?", uid).First(&user)
 	return user
 }
 
 // GetUserByPhone 通过用户手机号获取用户信息
 func (u *userService) GetUserByPhone(phone string) dbmodel.UserDBModel {
 	user := dbmodel.UserDBModel{}
-	u.db.Omit("password").Where("phone = ?", phone).First(&user)
+	u.db.Where("phone = ?", phone).First(&user)
 	return user
 }
 

@@ -9,7 +9,7 @@ func EncryptPassword(password string) string {
 }
 
 // ComparePassword compares the password with the hash
-func ComparePassword(password string, hash string) bool {
+func ComparePassword(hash string, password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
 }

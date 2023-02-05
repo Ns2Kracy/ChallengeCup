@@ -37,6 +37,6 @@ func InitMysql() *gorm.DB {
 	if err != nil {
 		return nil
 	}
-	log.Info("mysql connect success")
+	log.Info("Mysql connect success")
 	return db
 }

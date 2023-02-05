@@ -24,5 +24,7 @@ tmp
 ./docs
 
 *.out
-
 ChallengeCup
+main
+
+run.sh
