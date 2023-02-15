@@ -8,11 +8,13 @@ import (
 
 type ServiceEntry struct {
 	UserService UserService
+	MqttService MqttService
 }
 
 func NewServiceEntry(db *gorm.DB) *ServiceEntry {
 	return &ServiceEntry{
 		UserService: NewUserService(db),
+		MqttService: NewMqttService(db),
 	}
 }
 

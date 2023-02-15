@@ -55,3 +55,10 @@ func Reply(topic string, replay interface{}) {
 	}
 	Publish(topic, string(marshal))
 }
+
+func InitMqtt() {
+	// db := dao.InitMysql()
+	RunMqttClient()
+	Subscribe("test", func(client mqtt.Client, msg mqtt.Message) {
+	})
+}

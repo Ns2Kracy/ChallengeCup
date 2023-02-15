@@ -28,6 +28,8 @@ type UserService interface {
 	GetUserByPhone(phone string) dbmodel.UserDBModel
 }
 
+var _ UserService = (*userService)(nil)
+
 type userService struct {
 	db *gorm.DB
 }

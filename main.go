@@ -2,17 +2,16 @@ package main
 
 import (
 	"net"
-	"os"
 	"time"
 
 	"ChallengeCup/config"
 	"ChallengeCup/dao"
 	"ChallengeCup/router"
-	"ChallengeCup/utils/file"
 
 	"ChallengeCup/utils/mqtt"
 
 	"github.com/kataras/iris/v12"
+	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 )
 
 func main() {
@@ -20,9 +19,13 @@ func main() {
 	app := iris.New()
 	router.InitRoute(app)
 
-	logFile := NewLogFile()
-	app.Logger().AddOutput(logFile)
-	defer logFile.Close()
+	logPath := "./log/"
+	logWriter, _ := rotatelogs.New(
+		logPath+".%Y%m%d%H%M"+".log",
+		rotatelogs.WithMaxAge(time.Duration(180)*time.Second),
+		rotatelogs.WithRotationTime(time.Duration(60)*time.Second),
+	)
+	app.Logger().AddOutput(logWriter)
 
 	mqtt.RunMqttClient()
 	dao.NewRedis()
@@ -47,20 +50,4 @@ func main() {
 	); err != nil {
 		return
 	}
-}
-
-func NewLogFile() *os.File {
-	logFile := time.Now().Format("2006-01-02") + ".log"
-	logdir := "./log"
-	if !file.IsExist(logdir) {
-		err := file.NewDir(logdir)
-		if err != nil {
-			panic(err)
-		}
-	}
-	file, err := os.OpenFile("./log/"+logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o666)
-	if err != nil {
-		panic(err)
-	}
-	return file
 }

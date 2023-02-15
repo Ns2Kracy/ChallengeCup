@@ -1,6 +1,6 @@
 module ChallengeCup
 
-go 1.19
+go 1.20
 
 require github.com/kataras/iris/v12 v12.2.0-beta7.0.20230125035042-fc4214e9ae4a // direct
 
@@ -14,23 +14,27 @@ require (
 
 require (
 	github.com/aliyun/alibaba-cloud-sdk-go v1.62.139
+	github.com/eclipse/paho.mqtt.golang v1.4.2
 	github.com/go-redis/redis/v9 v9.0.0-rc.2
+	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
 )
 
 require (
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
-	github.com/eclipse/paho.mqtt.golang v1.4.2 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af // indirect
+	github.com/jonboulle/clockwork v0.3.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kr/text v0.2.0 // indirect
+	github.com/lestrrat-go/strftime v1.0.6 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/opentracing/opentracing-go v1.2.1-0.20220228012449-10b1cf09e00b // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 )
 
