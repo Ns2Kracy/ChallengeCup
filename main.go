@@ -21,12 +21,13 @@ func main() {
 
 	logPath := "./log/"
 	logWriter, _ := rotatelogs.New(
-		logPath+".%Y%m%d%H%M"+".log",
+		logPath+"%Y-%m-%d"+".log",
 		rotatelogs.WithMaxAge(time.Duration(180)*time.Second),
 		rotatelogs.WithRotationTime(time.Duration(60)*time.Second),
 	)
 	app.Logger().AddOutput(logWriter)
 
+	dao.DB = dao.InitMysql()
 	mqtt.RunMqttClient()
 	dao.NewRedis()
 

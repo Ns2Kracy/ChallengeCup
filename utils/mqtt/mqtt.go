@@ -4,14 +4,20 @@ import (
 	"encoding/json"
 
 	"ChallengeCup/config"
+	"ChallengeCup/dao"
 	log "ChallengeCup/utils/logger"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
-var Client mqtt.Client
-
-type HandleFunc func(topic string, payload interface{})
+var (
+	Client   mqtt.Client
+	callback = func(client mqtt.Client, msg mqtt.Message) {
+		// * TODO: 处理消息
+		dao.DB.Create("")
+		log.Info("MQTT 收到消息: %s", msg.Payload())
+	}
+)
 
 func RunMqttClient() {
 	conf := config.LoadConfig().Mqtt
@@ -25,7 +31,6 @@ func RunMqttClient() {
 	if token := Client.Connect(); token.Wait() && token.Error() != nil {
 		log.Fatalf("MQTT Connect Error: ", token.Error())
 	}
-	Client.Publish("server_will", 2, false, "connect")
 	log.Info("MQTT Connect Success")
 }
 
@@ -54,11 +59,4 @@ func Reply(topic string, replay interface{}) {
 		return
 	}
 	Publish(topic, string(marshal))
-}
-
-func InitMqtt() {
-	// db := dao.InitMysql()
-	RunMqttClient()
-	Subscribe("test", func(client mqtt.Client, msg mqtt.Message) {
-	})
 }

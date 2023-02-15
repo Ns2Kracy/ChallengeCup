@@ -9,7 +9,6 @@ func MqttPublish(ctx iris.Context) {
 }
 
 func GetData(ctx iris.Context) {
-	
 }
 
 func GetDataByTime(ctx iris.Context) {
