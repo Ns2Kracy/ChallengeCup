@@ -2,31 +2,30 @@ module ChallengeCup
 
 go 1.20
 
-require github.com/kataras/iris/v12 v12.2.0-beta7.0.20230125035042-fc4214e9ae4a // direct
+require github.com/kataras/iris/v12 v12.2.0-beta7.0.20230202111503-bd04dea30d6f // direct
 
 require (
 	github.com/go-sql-driver/mysql v1.7.0
 	github.com/sirupsen/logrus v1.9.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1
-	gorm.io/driver/mysql v1.4.4
-	gorm.io/gorm v1.24.2
+	gorm.io/driver/mysql v1.4.6
+	gorm.io/gorm v1.24.5
 )
 
 require (
-	github.com/aliyun/alibaba-cloud-sdk-go v1.62.139
+	github.com/aliyun/alibaba-cloud-sdk-go v1.62.169
 	github.com/eclipse/paho.mqtt.golang v1.4.2
-	github.com/go-redis/redis/v9 v9.0.0-rc.2
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
+	github.com/redis/go-redis/v9 v9.0.2
 )
 
 require (
-	github.com/cespare/xxhash/v2 v2.1.2 // indirect
+	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
-	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
-	github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/jonboulle/clockwork v0.3.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kr/text v0.2.0 // indirect
@@ -35,7 +34,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/opentracing/opentracing-go v1.2.1-0.20220228012449-10b1cf09e00b // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
+	golang.org/x/sync v0.1.0 // indirect
 )
 
 require (
@@ -53,7 +52,7 @@ require (
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/css v1.0.0 // indirect
-	github.com/iris-contrib/middleware/jwt v0.0.0-20221109225525-f806663b83a0
+	github.com/iris-contrib/middleware/jwt v0.0.0-20230203164339-425b08ba1830
 	github.com/iris-contrib/schema v0.0.6 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/kataras/blocks v0.0.7 // indirect
@@ -64,7 +63,7 @@ require (
 	github.com/klauspost/compress v1.15.15 // indirect
 	github.com/mailgun/raymond/v2 v2.0.48 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
-	github.com/microcosm-cc/bluemonday v1.0.21 // indirect
+	github.com/microcosm-cc/bluemonday v1.0.22 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/schollz/closestmatch v2.1.0+incompatible // indirect
 	github.com/tdewolff/minify/v2 v2.12.4 // indirect
@@ -73,10 +72,10 @@ require (
 	github.com/vmihailenco/msgpack/v5 v5.3.5 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/yosssi/ace v0.0.5 // indirect
-	golang.org/x/crypto v0.5.0
-	golang.org/x/net v0.5.0 // indirect
-	golang.org/x/sys v0.4.0 // indirect
-	golang.org/x/text v0.6.0 // indirect
+	golang.org/x/crypto v0.6.0
+	golang.org/x/net v0.7.0 // indirect
+	golang.org/x/sys v0.5.0 // indirect
+	golang.org/x/text v0.7.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect

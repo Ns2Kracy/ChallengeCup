@@ -36,17 +36,10 @@ func InitRoute(r *iris.Application) {
 			user.Put("/info/phone", controller.PutUserPhone)
 		}
 
-		user.Party("/status")
+		user.Party("/")
 		{
 			user.Use(middleware.JwtAuthMiddleware)
-			user.Get("/", controller.GetData)
-			user.Get("/temperature", controller.GetTemperature)
-			user.Get("/heart_rate", controller.GetHeartRate)
-			user.Get("/blood_oxygen", controller.GetBloodOxygen)
-			user.Get("/get_by_time", controller.GetDataByTime)
-			user.Get("/get_by_time/temperature", controller.GetTemperatureByTime)
-			user.Get("/get_by_time/heart_rate", controller.GetHeartRateByTime)
-			user.Get("/get_by_time/blood_oxygen", controller.GetBloodOxygenByTime)
+			user.Get("/status", controller.GetMqttData)
 		}
 	}
 }

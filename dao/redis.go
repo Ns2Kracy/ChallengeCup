@@ -4,7 +4,7 @@ import (
 	"ChallengeCup/config"
 	log "ChallengeCup/utils/logger"
 
-	"github.com/go-redis/redis/v9"
+	"github.com/redis/go-redis/v9"
 )
 
 var RedisClient *redis.Client

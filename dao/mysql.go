@@ -35,7 +35,10 @@ func InitMysql() *gorm.DB {
 	sqlDB.SetMaxIdleConns(10)
 	sqlDB.SetMaxOpenConns(100)
 
-	err = db.AutoMigrate(&dbmodel.UserDBModel{})
+	err = db.AutoMigrate(
+		&dbmodel.UserDBModel{},
+		&dbmodel.MqttData{},
+	)
 	if err != nil {
 		return nil
 	}

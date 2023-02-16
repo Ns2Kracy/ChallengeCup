@@ -28,7 +28,7 @@ func main() {
 	app.Logger().AddOutput(logWriter)
 
 	dao.DB = dao.InitMysql()
-	mqtt.RunMqttClient()
+	mqtt.InitMqtt()
 	dao.NewRedis()
 
 	listener, err := net.Listen("tcp", conf.System.Host+":"+conf.System.Port)
