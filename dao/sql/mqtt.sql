@@ -1,0 +1,7 @@
+CREATE mqtt_data (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    temperature FLOAT NOT NULL,
+    heart_rate FLOAT NOT NULL,
+    blood_oxygen FLOAT NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

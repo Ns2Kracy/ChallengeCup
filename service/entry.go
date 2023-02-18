@@ -18,4 +18,4 @@ func NewServiceEntry(db *gorm.DB) *ServiceEntry {
 	}
 }
 
-var Service = NewServiceEntry(dao.DB)
+var Service = NewServiceEntry(dao.InitMysql())

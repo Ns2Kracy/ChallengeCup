@@ -12,15 +12,15 @@ import (
 )
 
 var (
+	DB       = dao.InitMysql()
 	Client   mqtt.Client
 	callback = func(client mqtt.Client, msg mqtt.Message) {
 		var message dbmodel.MqttData
 		err := json.Unmarshal(msg.Payload(), &message)
 		if err != nil {
-			log.Errorf("MQTT 反序列化失败", err)
-			return
+			log.Errorf("MQTT 反序列化失败, 数据丢弃", err)
 		}
-		dao.DB.Create(&message)
+		DB.Create(&message)
 	}
 )
 

@@ -11,8 +11,6 @@ import (
 	"gorm.io/gorm"
 )
 
-var DB *gorm.DB
-
 func InitMysql() *gorm.DB {
 	conf := config.LoadConfig().Mysql
 	if conf.Database == "" {

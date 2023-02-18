@@ -24,6 +24,7 @@ func InitRoute(r *iris.Application) {
 		user.Get("/get_code", controller.GetPhoneCode)
 
 		user.Post("/logout", controller.PostUserLogout)
+		user.Get("/status", controller.GetMqttData)
 
 		user.Party("/")
 		{
@@ -38,8 +39,7 @@ func InitRoute(r *iris.Application) {
 
 		user.Party("/")
 		{
-			user.Use(middleware.JwtAuthMiddleware)
-			user.Get("/status", controller.GetMqttData)
+			// user.Use(middleware.JwtAuthMiddleware)
 		}
 	}
 }

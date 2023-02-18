@@ -27,7 +27,6 @@ func main() {
 	)
 	app.Logger().AddOutput(logWriter)
 
-	dao.DB = dao.InitMysql()
 	mqtt.InitMqtt()
 	dao.NewRedis()
 
